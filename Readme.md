@@ -59,6 +59,11 @@ cp .env.example .env
 
 - `WANDB_API_KEY` [W&amp;A-QuickStart](https://wandb.ai/quickstart?utm_source=app-resource-center&utm_medium=app&utm_term=quickstart)
 
+# Datasets
+
+- `datasource` 数据源
+- `label` 数据分类
+
 # Documents of utils
 
 ## wlog
@@ -68,22 +73,6 @@ cp .env.example .env
 ### class WandbLogger
 
     `init_wandb`: 初始化wandb
-
-## pytorch
-### initialization 初始化  model, optimizer, scheduler, scaler, loss_func
-
-### train_an_epoch 构建一个epoch的训练流程
-
-### test_an_epoch 构建一个epoch的测试和验证流程
-
-### save_model 保存模型
-### save_optimizer 保存优化器
-### save_latest_epoch_info 保存最近epoch信息
-### load_model 加载模型
-### load_optimizer 加载优化器
-### load_latest_epoch_info 加载最近epoch信息
-
-
 
 
 # Todo

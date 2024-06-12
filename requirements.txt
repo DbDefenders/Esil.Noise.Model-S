@@ -7,3 +7,5 @@ librosa
 python-dotenv
 jupyterlab
 gradio
+scikit-learn
+torchmetrics

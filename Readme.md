@@ -70,8 +70,9 @@ cp .env.example .env
 
 ### class LogFileType : wandb files type
 
-### class WandbLogger: xxx
+### class WandbLogger
 
     `init_wandb`: 初始化wandb
+
 
 # Todo

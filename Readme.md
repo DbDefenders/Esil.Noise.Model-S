@@ -73,6 +73,10 @@ cp .env.example .env
 
 ### class WandbLogger: logger with wandb
 
+## pytorch
+
+### initialization 初始化模型、优化器、缩放器、损失器
+
 # Todo
 
 * [ ] 自由搭配数据集

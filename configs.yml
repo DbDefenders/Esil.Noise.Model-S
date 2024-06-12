@@ -21,3 +21,26 @@ Features:
     n_fft: 1024
     hop_length: 512
     win_length: None
+
+Tags:
+  enable_amp : Flase
+  wandb : Flase
+
+Train:
+  epochs: 10
+  max_epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  optimizer: adam
+  criterion: cross_entropy
+  scheduler: reduce_lr_on_plateau
+  patience: 5
+  factor: 0.1
+  min_lr: 1e-6
+  weight_decay: 0.0
+  num_workers: 4
+  pin_memory: True
+  seed: 42
+  model_path : None
+  optimizer_path: None
+  loss_type: CrossEntropyLoss

@@ -65,9 +65,25 @@ cp .env.example .env
 
 ### class LogFileType : wandb files type
 
-### class WandbLogger: xxx
+### class WandbLogger
 
     `init_wandb`: 初始化wandb
+
+## pytorch
+### initialization 初始化  model, optimizer, scheduler, scaler, loss_func
+
+### train_an_epoch 构建一个epoch的训练流程
+
+### test_an_epoch 构建一个epoch的测试和验证流程
+
+### save_model 保存模型
+### save_optimizer 保存优化器
+### save_latest_epoch_info 保存最近epoch信息
+### load_model 加载模型
+### load_optimizer 加载优化器
+### load_latest_epoch_info 加载最近epoch信息
+
+
 
 
 # Todo

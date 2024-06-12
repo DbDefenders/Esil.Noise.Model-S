@@ -59,6 +59,11 @@ cp .env.example .env
 
 - `WANDB_API_KEY` [W&amp;A-QuickStart](https://wandb.ai/quickstart?utm_source=app-resource-center&utm_medium=app&utm_term=quickstart)
 
+# Datasets
+
+- `datasource` 数据源
+- `label` 数据分类
+
 # Documents of utils
 
 ## wlog
@@ -68,6 +73,5 @@ cp .env.example .env
 ### class WandbLogger: xxx
 
     `init_wandb`: 初始化wandb
-
 
 # Todo

@@ -63,6 +63,7 @@ cp .env.example .env
 
 - `datasource` 数据源：包括ESC50，US8K，自定义的100类数据集
 - `label` 数据分类
+- `base` 与数据集相关的基类
 
 # Documents of utils
 

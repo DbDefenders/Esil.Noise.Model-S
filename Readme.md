@@ -61,7 +61,7 @@ cp .env.example .env
 
 # Datasets
 
-- `datasource` 数据源
+- `datasource` 数据源：包括ESC50，US8K，自定义的100类数据集
 - `label` 数据分类
 
 # Documents of utils
@@ -70,9 +70,9 @@ cp .env.example .env
 
 ### class LogFileType : wandb files type
 
-### class WandbLogger
-
-    `init_wandb`: 初始化wandb
-
+### class WandbLogger: logger with wandb
 
 # Todo
+
+* [ ] 自由搭配数据集
+* [ ] 模型训练与测试

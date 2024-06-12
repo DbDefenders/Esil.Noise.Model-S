@@ -1,0 +1,9 @@
+wandb
+torch
+torchaudio
+matplotlib
+numpy
+librosa
+python-dotenv
+jupyterlab
+gradio

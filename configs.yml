@@ -1,0 +1,23 @@
+Features:
+  SPECTROGRAM:
+    n_fft: 1024
+    hop_length: 512
+    win_length: None
+  MEL_SPECTROGRAM:
+    sample_rate: 44100
+    n_fft: 1024
+    n_mels: 128
+    hop_length: 512
+    win_length: None
+  MFCC:
+    sample_rate: 44100
+    n_mfcc: 64
+    n_fft: 1024
+    n_mels: 128
+    hop_length: 512
+  LFCC:
+    sample_rate: 44100
+    n_lfcc: 64
+    n_fft: 1024
+    hop_length: 512
+    win_length: None

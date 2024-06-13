@@ -1,8 +1,7 @@
 from enum import Enum
 import torchaudio.transforms as T
-import yaml
 from typing import Union
-    
+from utils import config
 class FeatureType(Enum):
     SPECTROGRAM = {'n_fft', 'hop_length', 'win_length'}
     MEL_SPECTROGRAM = {'sample_rate', 'n_fft', 'n_mels', 'hop_length', 'win_length'}
@@ -11,6 +10,7 @@ class FeatureType(Enum):
     
     def __str__(self) -> str:
         return self.name.lower()
+    
     
 def get_feature_transformer(feature_type: Union[str, FeatureType], **kwargs):
     if isinstance(feature_type, str):
@@ -74,7 +74,6 @@ def get_lfcc_transformer(sample_rate, n_lfcc, n_fft, hop_length, win_length=None
         },
     )
 
-def feature_from_config(feature:FeatureType,config_file="configs.yml"):
-    with open(config_file, 'r') as f:
-        config = yaml.safe_load(f)
-    return get_feature_transformer(feature,**config['Features'][feature.name])
+def feature_from_config(feature:FeatureType):
+
+    return get_feature_transformer(feature,config.features[feature.name])

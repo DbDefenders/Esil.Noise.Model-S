@@ -12,16 +12,17 @@ from sklearn import metrics
 import numpy as np
 from torchmetrics.functional.classification import auroc,precision,f1_score,recall,accuracy
 from torch.cuda import amp
+
+from utils import config
 '''PyTorch的amp模块可以帮助用户在保持数值稳定性的同时,最大化利用16位浮点数的优势。
 自动混合精度训练通常结合使用16位浮点数(float16或半精度)和32位浮点数(float32或全精度)。
 16位浮点数可以加快计算速度并减少内存使用,但可能牺牲一些数值稳定性。'''
 #region base
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-with open("configs.yml", "r") as f:
-    config = yaml.safe_load(f)
-    FeatureParams = config["Features"]
-    TagsParams = config["Tags"]
-    TrainsParams = config["Train"]
+
+FeatureParams = config.features
+TagsParams = config.tags
+TrainsParams = config.train
 #endregion
 
     

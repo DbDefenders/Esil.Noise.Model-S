@@ -29,7 +29,7 @@ class DataSourceBase(BisectList, ABC):
         if childs is None:
             childs = []
         
-        super().__init__(lst_of_lst=childs, primary_key='label', reset_index=True, length=length)
+        super().__init__(lst_of_lst=childs, sort_key='label', reset_index='label', length=length)
         
     @property
     def id(self):
@@ -43,15 +43,22 @@ class DataSourceBase(BisectList, ABC):
     def childs(self):
         return self.lst_of_lst
     
+    @property
+    def childs_info(self):
+        return [c.name for c in self.childs]
+    
     def add_child(self, child: 'DataSourceBase'):
         self.set_lst_of_lst(self.lst_of_lst + [deepcopy(child)])
         
-    def get_child(self, index:Union[str|int]):
-        return get_child(index, self.lst_of_lst)
-    
-    def childs_info(self):
-        return [c.name for c in self.childs]
+    def get_child(self, index_or_name:Union[str,int]) -> 'DataSourceBase':
+        return deepcopy(get_child(index_or_name, self.lst_of_lst))
         
+    def get_childs(self, index_or_lst:Union[str,int,List[Union[str,int]]]) -> List['DataSourceBase']:
+        if isinstance(index_or_lst, list):
+            return [self.get_child(index) for index in index_or_lst]
+        else:
+            return [self.get_child(index_or_lst)]
+
     def to_dict(self):
         ret = {
             'name': self.name,
@@ -75,6 +82,13 @@ class DataSourceBase(BisectList, ABC):
             # return os.path.join(self.base_dir, self.get_file_path(index)), self.name, self.label
             return os.path.join(self.base_dir, self.get_file_path(index))
         
+    def __eq__(self, other):
+        return (self.name == other.name and self.base_dir == other.base_dir) or (self[0] == other[0] and self[-1] == other[-1])
+    
+    
+    def __hash__(self):
+        return hash(self.name+self.base_dir)
+        
     def save_to_file(self, file_path):
         if not file_path.lower().endswith('.json'):
             file_path += '.json'
@@ -82,6 +96,43 @@ class DataSourceBase(BisectList, ABC):
         save_json(obj=ret, file_path=file_path)
         print('Saved DataSource to:', file_path)
         return file_path
+    
+    def to_label(self)->"Label":
+        if self.has_next():
+            return Label(name=self.name, sources=self.childs)
+        else:
+            return Label(name=self.name, sources=[self])
+        
+    
+class Label(BisectList):
+    def __init__(self, name, sources:Union[DataSourceBase, List[DataSourceBase]], id:int=None):
+        self.name = name
+        self.id = id
+        if isinstance(sources, DataSourceBase):
+            sources = [sources]
+        super().__init__(lst_of_lst=sources, sort_key='name', reset_index=None)
+    
+    @property
+    def sources(self):
+        return self.lst_of_lst
+    
+    def add_sources(self, sources:Union[DataSourceBase, List[DataSourceBase]]):
+        if isinstance(sources, DataSourceBase):
+            sources = [sources]
+        for s in sources:
+            if s in self.sources:
+                print(f"Source '{s.name}' already exists in label {self.name}")
+                sources.remove(s)
+            
+        self.set_lst_of_lst(sources + self.sources)
+        
+    def __getitem__(self, index):
+        if index < 0: index += len(self)
+        assert index < len(self), f"Index {index} out of range: max = {len(self)-1}"
+        return self.find_in_next(index)
+    
+    def __repr__(self):
+        return f"Label(name='{self.name}', sources={self.sources}, id={self.id})"
     
 class DatasetBase(ABC, torch.utils.data.Dataset):
     '''

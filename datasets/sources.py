@@ -1,7 +1,8 @@
 import os
+import json
 import pandas as pd
 from utils.common import create_repr_str
-from datasets.base import DataSourceBase
+from .models.base import DataSourceBase
 
 
 class ESC50DataSource(DataSourceBase):
@@ -106,23 +107,26 @@ class ProvinceDataSource(DataSourceBase):
     def __init__(
         self,
         base_dir: str,
+        meta_file: str,
+        *,
         name: str,
         label: int = None,
-        label_lst: list = None,
         length: int = None,
         parent: str = None,
     ):
         self.parent = parent
-
-        if label_lst is None:
-            label_lst = []
+        
+        with open(meta_file, "r", encoding="utf-8") as f:
+            graph = json.load(f)
+        
+        label_lst = graph.get(name, [])
         childs = None
         if len(label_lst) > 0:
             childs = []
             for i, l in enumerate(label_lst):
                 childs.append(
                     ProvinceDataSource(
-                        base_dir=base_dir, name=l, label=i, length=1200, parent=name
+                        base_dir=base_dir, name=l, label=i, length=1200, parent=name, meta_file=meta_file
                     )
                 )
         super().__init__(

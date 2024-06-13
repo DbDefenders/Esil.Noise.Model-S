@@ -5,5 +5,5 @@
 **wandb**
 test/**
 .DS_Store
-!utils/**
 **pyc**
+test.ipynb

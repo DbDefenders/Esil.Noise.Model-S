@@ -2,8 +2,8 @@ import os
 import json
 import pandas as pd
 from utils.common import create_repr_str
+from utils import config
 from .models.base import DataSourceBase
-
 
 class ESC50DataSource(DataSourceBase):
     def __init__(
@@ -143,3 +143,14 @@ class ProvinceDataSource(DataSourceBase):
     def __repr__(self):
         properties = ["base_dir", "name", "label", "length", "childs", "parent"]
         return create_repr_str(self, properties)
+
+datasources_info = config.data_sources
+
+class SupportedSources:
+    US8K = US8KDataSource(**datasources_info['US8K'])
+    ESC50 = ESC50DataSource(**datasources_info['ESC50'])
+    TRAFFIC = ProvinceDataSource(name="交通噪声", **datasources_info['Province'])
+    NATURE = ProvinceDataSource(name="自然噪声", **datasources_info['Province'])
+    INDUSTRIAL = ProvinceDataSource(name="工业噪声", **datasources_info['Province'])
+    SOCIAL = ProvinceDataSource(name="社会噪声", **datasources_info['Province'])
+    CONSTRUCTIONAL = ProvinceDataSource(name="建筑施工噪声", **datasources_info['Province'])

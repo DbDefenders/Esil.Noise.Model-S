@@ -1,5 +1,6 @@
-from .base import DatasetBase, DataSourceBase
+from .base import DataSourceBase
 from .label import Label
 from .category import Category
+from .dataset import Dataset
 
-__all__ = ['DatasetBase', 'DataSourceBase', 'Label', 'Category']
+__all__ = ['Dataset', 'DataSourceBase', 'Label', 'Category']

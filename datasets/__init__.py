@@ -1,8 +1,48 @@
-from .models import DatasetBase, Label, Category
+from .models import Dataset, Label, Category
+from torch import nn
+import torch
 
-# TODO
-class Dataset(DatasetBase):
-    def __init__(self, target_sr:int, duration:int, category:Category,test_ratio:float=0.2, seed:int=1202):
-        super().__init__(target_sr=target_sr, duration=duration)
+class DatasetFactory:
+    def __init__(self, category:Category, test_ratio:float=0.2, seed:int=1202):
+        '''
+        初始化数据集工厂
+
+        :param category: 数据集类别
+        :param test_ratio: 测试集比例
+        :param seed: 随机种子
+        '''
         self.category = category
-        self.X_train, self.y_train, self.X_test, self.y_test = self.category.get_train_test_data(test_ratio=test_ratio, seed=seed)
+        self.name = category.name
+        self.test_ratio = test_ratio
+        self.seed = seed
+
+        self.X_train, self.X_test, self.y_train, self.y_test = category.get_train_test_data(test_ratio=test_ratio, seed=seed)
+
+    def count_train_test_data(self) -> tuple:
+        '''
+        计数训练集和测试集样本数
+        '''
+        counter_train, counter_test = self.category.count_train_test_data(y_train=self.y_train, y_test=self.y_test)
+
+        return counter_train, counter_test
+
+    def create_dataset(self, *, train:bool, target_sr:int, duration:float, extractor:nn.Module) -> torch.utils.data.Dataset:
+        '''
+        获取训练集或测试集数据集
+
+        :param train: 是否为训练集
+        :param target_sr: 目标采样率
+        :param duration: 目标时长
+        :param extractor: 特征提取器
+        :return: 数据集
+        '''
+        if train:
+            X = self.X_train
+            y = self.y_train
+        else:
+            X = self.X_test
+            y = self.y_test
+        
+        return Dataset(name=self.name, target_sr=target_sr, duration=duration, extractor=extractor, input_files=X, output_targets=y)
+    
+__all__ = ['DatasetFactory', 'Dataset', 'Label', 'Category']

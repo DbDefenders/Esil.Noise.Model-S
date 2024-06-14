@@ -41,7 +41,7 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 1. 下载 `ffmpeg` 的 Windows 版本并解压缩。
 2. 将 `ffmpeg` 和 `ffprobe` 的路径添加到系统的环境变量中。
 
-## Set Environment Variable
+## Set Environment Variable and Configs
 
 ### Copy a `.env` file from `.env.example`
 
@@ -60,6 +60,22 @@ cp .env.example .env
 ### Fill environment variable in `.env`
 
 - `WANDB_API_KEY` [W&amp;A-QuickStart](https://wandb.ai/quickstart?utm_source=app-resource-center&utm_medium=app&utm_term=quickstart)
+- `GRADIO_ROOT_PATH` root path of gradio app, default to ""
+- `GRADIO_SERVER_PORT` server port of gradio app, default to "8080"
+
+### Copy a `configs.yml` file from `configs.yml.example`
+
+#### Windows cmd
+
+```shell
+copy configs.yml.example configs.yml
+```
+
+#### Linux
+
+```shell
+cp configs.yml.example configs.yml
+```
 
 # datasets
 

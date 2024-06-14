@@ -36,6 +36,8 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ### Windows
 
+> 参考链接：[Download FFmpeg](https://ffmpeg.org/download.html#build-windows)
+
 1. 下载 `ffmpeg` 的 Windows 版本并解压缩。
 2. 将 `ffmpeg` 和 `ffprobe` 的路径添加到系统的环境变量中。
 
@@ -59,11 +61,26 @@ cp .env.example .env
 
 - `WANDB_API_KEY` [W&amp;A-QuickStart](https://wandb.ai/quickstart?utm_source=app-resource-center&utm_medium=app&utm_term=quickstart)
 
-# Datasets
+# datasets
 
-- `datasource` 数据源：包括ESC50，US8K，自定义的100类数据集
-- `label` 数据分类
-- `base` 与数据集相关的基类
+- `DataSource` 数据源：目前支持的数据集（datasets.SupportedSources）包括ESC50，US8K，以及五大类噪声。
+- `Label` 自定义数据标签
+- `Category` 数据类别
+- `DatasetFactory` 根据 `Category`创建数据集的工厂
+
+## 数据集的创建流程
+
+1、根据  `SupportedSources` 创建自定义数据标签列表 `labels`
+
+2、根据数据标签列表 `labels` 创建数据类别 `category`
+
+3、使用  `category` 创建 `DatasetFactory`
+
+4、调用 `DatasetFactory` 中的 `create_dataset` 创建训练集或测试集
+
+> sources -> labels -> category -> dataset_factory -> train_data, test_data
+
+> 参考: "test_dataset_factory.ipynb"
 
 # Documents of utils
 
@@ -79,5 +96,5 @@ cp .env.example .env
 
 # Todo
 
-* [ ] 自由搭配数据集
+* [X] 自由搭配数据集
 * [ ] 模型训练与测试

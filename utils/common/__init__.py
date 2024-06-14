@@ -70,14 +70,14 @@ class BisectList(ABC):
         else:
             self.by = by
         self.lst_of_lst.sort(key=lambda x: getattr(x, by))
-        self.bisert_breakpoints = []
+        self.bisect_breakpoints = []
         start = 0
         for index, child in enumerate(self.lst_of_lst):
             if isinstance(self.reset_index, str) and hasattr(child, self.reset_index): setattr(child, self.reset_index, index)
             start += len(child)
-            self.bisert_breakpoints.append(start)
-        self.left_bps = [0] + self.bisert_breakpoints[:-1]
-        self.right_bps = list(map(lambda x: x-0.5, self.bisert_breakpoints))
+            self.bisect_breakpoints.append(start)
+        self.left_bps = [0] + self.bisect_breakpoints[:-1]
+        self.right_bps = list(map(lambda x: x-0.5, self.bisect_breakpoints))
         
     def get_next_idx(self, index:int)->tuple:
         next_idx = bisect_left(self.right_bps, index)

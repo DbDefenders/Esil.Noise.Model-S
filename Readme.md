@@ -84,7 +84,44 @@ cp configs.yml.example configs.yml
 - `Category` 数据类别
 - `DatasetFactory` 根据 `Category`创建数据集的工厂
 
+## 添加新的数据源（数据集）
+
+1、在 `datasets/models/sources.py`中定义新的数据源类型
+
+```python
+class CustomDatasource(DataSourceBase):
+    def __init__(self, base_dir: str, name: str, label: int=None, childs: int = None, **other_kwargs):
+  	# set other kwargs
+	# self.xxx = xxx
+        childs = None
+        # 根据数据集添加子类别
+        if has_childs:
+            childs = []
+            for i in range(num_childs):
+                childs.append(CustomDatasource(base_dir, name, i))
+        super().__init__(base_dir=base_dir, name=name, label=label, childs=childs)
+
+    def get_file_path(self, index: int) -> str:
+        raise NotImplementedError("需要实现get_file_path方法")
+  
+    def __repr__(self):
+        properties = ["base_dir", "name", "label", "childs"] # and any other properties you want to include
+        return create_repr_str(self, properties)
+```
+
+2、在 `configs.yml`中的 `DataSources`的添加新的数据源的参数，例如： `base_dir`和 `meta_file`等
+
+3、在 `datasets/SupportedSources.py`中添加新的数据源实例
+
+```python
+CUSTOM = CustomDatasource(**datasources_info['Custom'], **other_kwargs)
+
+# __all__.append("CUSTOM"])
+```
+
 ## 数据集的创建流程
+
+0、检查 `configs.yml`中的 `DataSources`的 `base_dir`和 `meta_file`路径是否正确
 
 1、根据  `SupportedSources` 创建自定义数据标签列表 `labels`
 

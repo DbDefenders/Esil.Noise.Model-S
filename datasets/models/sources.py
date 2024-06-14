@@ -7,8 +7,8 @@ from .base import DataSourceBase
 class ESC50DataSource(DataSourceBase):
     def __init__(
         self,
-        meta_file,
-        base_dir,
+        meta_file: str,
+        base_dir: str,
         name: str = "ESC50",
         label: int = None,
         length: int = None,
@@ -43,7 +43,7 @@ class ESC50DataSource(DataSourceBase):
             base_dir=base_dir, name=name, label=label, length=length, childs=childs
         )
 
-    def get_file_path(self, index) -> str:
+    def get_file_path(self, index: int) -> str:
         df = pd.read_csv(self.meta_file)
         ret = df[df["target"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["filename"])
@@ -56,8 +56,8 @@ class ESC50DataSource(DataSourceBase):
 class US8KDataSource(DataSourceBase):
     def __init__(
         self,
-        meta_file,
-        base_dir,
+        meta_file: str,
+        base_dir: str,
         name: str = "US8K",
         label: int = None,
         length: int = None,
@@ -92,7 +92,7 @@ class US8KDataSource(DataSourceBase):
             base_dir=base_dir, name=name, label=label, length=length, childs=childs
         )
 
-    def get_file_path(self, index) -> str:
+    def get_file_path(self, index: int) -> str:
         df = pd.read_csv(self.meta_file)
         ret = df[df["classID"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["slice_file_name"])
@@ -132,7 +132,7 @@ class ProvinceDataSource(DataSourceBase):
             base_dir=base_dir, name=name, label=label, length=length, childs=childs
         )
 
-    def get_file_path(self, index) -> str:
+    def get_file_path(self, index: int) -> str:
         assert self.parent is not None
         assert index < self.length
         return os.path.join(

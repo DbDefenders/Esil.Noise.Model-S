@@ -60,8 +60,8 @@ cp .env.example .env
 ### Fill environment variable in `.env`
 
 - `WANDB_API_KEY` [W&amp;A-QuickStart](https://wandb.ai/quickstart?utm_source=app-resource-center&utm_medium=app&utm_term=quickstart)
-- `GRADIO_ROOT_PATH` root path of gradio app, default to ""
-- `GRADIO_SERVER_PORT` server port of gradio app, default to "8080"
+- `GRADIO_ROOT_PATH` root path of gradio app, defaults to ""
+- `GRADIO_SERVER_PORT` server port of gradio app, defaults to "8080"
 
 ### Copy a `configs.yml` file from `configs.yml.example`
 

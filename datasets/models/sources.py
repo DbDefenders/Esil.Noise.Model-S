@@ -136,7 +136,7 @@ class ProvinceDataSource(DataSourceBase):
         assert self.parent is not None
         assert index < self.length
         return os.path.join(
-            self.base_dir, self.parent, self.name, f"{self.name}_{index}.wav"
+            self.parent, self.name, f"{self.name}_{index}.wav"
         )
 
     def __repr__(self):

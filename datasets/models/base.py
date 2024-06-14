@@ -132,7 +132,7 @@ class Label(BisectList):
         return self.find_in_next(index)
     
     def __repr__(self):
-        return f"Label(name='{self.name}', sources={self.sources}, id={self.id})"
+        return f"Label(id={self.id}, name='{self.name}', sources={self.sources})"
     
 class DatasetBase(ABC, torch.utils.data.Dataset):
     '''

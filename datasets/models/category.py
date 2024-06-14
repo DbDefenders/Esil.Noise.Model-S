@@ -1,13 +1,17 @@
-from enum import Enum
+from typing import Union
 from collections import Counter
 
 from sklearn.model_selection import train_test_split
 
+from .base import DataSourceBase
 from .label import Label
 from utils.common import BisectList, get_child
 
 class Category(BisectList):
-    def __init__(self, name:str, labels:list[Label]):
+    def __init__(self, name:str, labels:list[Union[Label, DataSourceBase]]):
+        for i, l in enumerate(labels):
+            if isinstance(l, DataSourceBase):
+                labels[i] = l.to_label()
         self.name = name
         super().__init__(lst_of_lst=labels, sort_key='name', reset_index='id')
     

@@ -1,45 +1,46 @@
 DataSources:
 # 数据源，linux下路径中要用“/”,不能用“\”
   US8K:
-    base_dir: c:\us8k
-    meta_file: static\meta_file\UrbanSound8K.csv
+    base_dir: c:/us8k
+    meta_file: static/meta_file/UrbanSound8K.csv
   ESC50:
-    base_dir: c:\esc50
-    meta_file: static\meta_file\esc50.csv
+    base_dir: c:/esc50
+    meta_file: static/meta_file/esc50.csv
   Province:
-    base_dir: \\10.166.168.123\典型城市声纹数据库-标签过
-    meta_file: static\meta_file\province.json
+    # base_dir: \\10.166.168.123\典型城市声纹数据库-标签过
+    base_dir: /home/likunjie/Projects/Datasets/典型城市声纹数据库-标签过
+    meta_file: static/meta_file/province.json
 Features:
   SPECTROGRAM:
     n_fft: 1024
     hop_length: 512
     win_length: None
   MEL_SPECTROGRAM:
-    sample_rate: 44100
+    sample_rate: 32000
     n_fft: 1024
     n_mels: 128
     hop_length: 512
     win_length: None
+    fmin: 20
+    fmax: 16000
   MFCC:
-    sample_rate: 44100
+    sample_rate: 32000
     n_mfcc: 64
     n_fft: 1024
     n_mels: 128
     hop_length: 512
+
   LFCC:
-    sample_rate: 44100
-    n_lfcc: 64
+    sample_rate: 32000
+    n_lfcc: 40
     n_fft: 1024
     hop_length: 512
     win_length: None
 
-Tags:
-  enable_amp : Flase
-  wandb : Flase
-
 Train:
-  epochs: 10
-  max_epochs: 100
+  model_name: cnn
+  start_epoch: 0
+  max_epochs: 5
   batch_size: 32
   learning_rate: 0.001
   optimizer: adam
@@ -48,10 +49,18 @@ Train:
   patience: 5
   factor: 0.1
   min_lr: 1e-6
-  weight_decay: 0.0
+  weight_decay: 0.01
   num_workers: 4
   pin_memory: True
   seed: 42
   model_path : None
   optimizer_path: None
   loss_type: CrossEntropyLoss
+  pool_type: 'avg'
+  best_loss: 1.00000
+  best_auc: 0.00000
+  best_prec: 0.00000
+  best_rec: 0.00000
+  best_acc: 0.00000
+  best_f1: 0.00000
+  best_f1_micro: 0.00000

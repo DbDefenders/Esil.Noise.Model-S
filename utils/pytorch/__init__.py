@@ -27,13 +27,16 @@ TrainsParams = config.train
 
     
 #region init
-def initialization(training_dataloader):
-    model = load_model(model,TrainsParams['model_path'])
+def initialization(training_dataloader,model):
     
     if TrainsParams['optimizer']=='adam':
         optimizer = torch.optim.AdamW(params=model.parameters(), lr=TrainsParams['learning_rate'], weight_decay=TrainsParams['weight_decay'])
     else:
-        optimizer = load_optimizer(optimizer, TrainsParams['optimizer_path'])
+        try:
+            optimizer = load_optimizer(optimizer, TrainsParams['optimizer_path'])
+        except Exception as e:
+            print(f"Error loading optimizer: {e}")
+            optimizer = None
     
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer=optimizer, epochs=TrainsParams['max_epochs'],
@@ -41,27 +44,27 @@ def initialization(training_dataloader):
         max_lr=TrainsParams['learning_rate'], div_factor=25, final_div_factor=4.0e-01
     )
     
-    scaler = amp.GradScaler(enabled=TagsParams['enable_amp'])
+    scaler = amp.GradScaler(enabled=True)
     if TrainsParams['loss_type'] == "BCEWithLogitsLoss":
         loss_func = torch.nn.BCEWithLogitsLoss()
     else:
         loss_func = torch.nn.CrossEntropyLoss().to(device)
-    return model.to(device), optimizer, scheduler, scaler, loss_func.to(device)
+    return  optimizer, scheduler, scaler, loss_func.to(device)
 #endregion
 
 #region train
-def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, training_training_dataloader:torch.utils.data.training_dataloader, scheduler,scaler, loss_func,*args):
+def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, training_dataloader, scheduler,scaler, loss_func,tag_wandb:bool=False,*args):
     trainloss = 0; model.train()  # 初始化训练损失为0，并设置模型为训练模式
     count = 0  # 初始化计数器
 
-    for idx, (features, label) in enumerate(tqdm(training_training_dataloader,leave=False ,desc="[train]")):  # 遍历数据加载器，使用tqdm显示进度条
+    for idx, (features, label) in enumerate(tqdm(training_dataloader,leave=False ,desc="[train]")):  # 遍历数据加载器，使用tqdm显示进度条
         # label = label.reshape(-1, len(LABELS))  # 用于调整标签的形状
         
         
         features, label = features.to(device), label.to(device)  # 将数据和标签移动到指定设备（如GPU）
         
         optimizer.zero_grad()  # 清空模型的梯度
-        with amp.autocast(TagsParams['enable_amp'], dtype=torch.bfloat16):  # 决定是否启用自动混合精度训练，并设置数据类型为torch.bfloat16
+        with amp.autocast(True, dtype=torch.bfloat16):  # 决定是否启用自动混合精度训练，并设置数据类型为torch.bfloat16
             pred = model.forward(features)  # 通过模型前向传播得到预测结果
             loss = loss_func(pred, label)  # 计算损失
         
@@ -77,30 +80,30 @@ def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, train
         # if count == 300:
         # break  # 注释掉的代码，可能用于限制训练的批量数
         
-    trainloss /= len(training_training_dataloader)  # 计算平均训练损失
+    trainloss /= len(training_dataloader)  # 计算平均训练损失
     '''计算累加训练损失：在训练过程中，对于每个批次，我们都会计算模型的损失。通过累加这些损失，我们可以得到整个训练集的总损失。
     在训练周期结束时，我们将总损失除以训练集中的批次数量，得到平均损失。
     这个平均损失是评估模型在训练集上表现的一个重要指标。通过监控平均损失的变化，我们可以了解模型是否正在学习以及学习的效果如何。'''
-    if TagsParams['wandb'] == True:  # 使用Weights & Biases记录训练损失和学习率
+    if tag_wandb == True:  # 使用Weights & Biases记录训练损失和学习率
         wandb.log({f"train_loss": trainloss, f"lr":scheduler.get_lr()[0]})
     return model, optimizer, scaler, scheduler, trainloss  # 返回更新后的模型、优化器、梯度缩放器、学习率调度器和平均训练损失
 
 #endregion
 #region test
-def test_an_epoch(model, training_dataloader, loss_func, LABELS:list, *args):
+def test_an_epoch(model, testing_dataloader, loss_func, LABELS:list, tag_wandb:bool=False, *args):
     validloss = 0  # 初始化验证集损失
     model.eval()  # 将模型设置为评估模式
     preds, targets = [],[]  # 初始化预测和目标列表
     with torch.no_grad():  # 在此上下文中，所有计算都不会跟踪梯度
-        for idx, (features, label) in enumerate(tqdm(training_dataloader, leave=False, desc="[valid]")):
+        for idx, (features, label) in enumerate(tqdm(testing_dataloader, leave=False, desc="[valid]")):
             # label = label.reshape(-1, len(LABELS))  # 这一行被注释掉了，如果需要调整标签的形状，应该取消注释
 
             features ,label = features.to(device), label.to(device)  # 将数据和标签移动到相应的设备上
-            with amp.autocast(TagsParams['enable_amp'], dtype=torch.bfloat16): 
+            with amp.autocast(True, dtype=torch.bfloat16): 
                 # 使用自动混合精度训练（如果启用）
                 pred = model.forward(features)  # 通过模型前向传播
-                preds.extend(pred.detach().numpy())  # 将预测结果添加到列表中
-                targets.extend(label.numpy())  # 将目标标签添加到列表中
+                preds.extend(pred.float().cpu().detach().numpy())  # 将预测结果添加到列表中
+                targets.extend(label.cpu().numpy())  # 将目标标签添加到列表中
 
     #======================== metrics ========================#
     # 将列表转换为张量
@@ -130,8 +133,7 @@ def test_an_epoch(model, training_dataloader, loss_func, LABELS:list, *args):
                              average="macro")  # 计算F1分数（宏观平均）
     f1_micro = f1_score(preds=preds_argmax,task='multiclass', target=targets_tensor, num_classes=len(LABELS),
                             average="micro")  # 计算F1分数（微观平均）
-
-    if TagsParams['wandb']  == True:
+    if tag_wandb  == True:
         wandb.log({f"valid_loss": validloss,
                    f"AUC":auc,
                    f"precision":prec, 

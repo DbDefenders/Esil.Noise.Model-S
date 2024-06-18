@@ -17,7 +17,7 @@ class Category(BisectList):
     
     @property 
     def labels(self) -> list[Label]:
-        return self.lst_of_lst
+        return self._lst_of_lst
     
     @labels.setter
     def labels(self, new_labels:list[Label]):
@@ -25,18 +25,19 @@ class Category(BisectList):
     
     @property
     def labels_info(self)->list:
-        return [{'id':l.id, 'name':l.name} for l in self.labels]
+        '''标签信息'''
+        return [{'id':l.id, 'name':l.name, "length":len(l)} for l in self.labels]
         
     def get_label(self, index):
         return get_child(index, self.labels)
     
     def __repr__(self):
-        return f"Category(name='{self.name}', labels={self.lst_of_lst})"
+        return f"Category(name='{self.name}', labels={self._lst_of_lst})"
     
     def __getitem__(self, index):
-        label_idx, _ = self.get_next_idx(index)
+        label_idx, _ = self.get_next_node_idx(index)
         label = self.labels[label_idx]
-        return self.find_in_next(index), label.id
+        return self.find_in_next_node(index), label.id
     
     def get_train_test_data(self, test_ratio:float=0.2, seed:int=1202):
         '''

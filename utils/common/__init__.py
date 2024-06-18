@@ -49,47 +49,47 @@ class BisectList(ABC):
         reset_index: the key to reset the index of each child in the list of lists.
         '''
         
-        self.by = sort_key
+        self._order_by = sort_key
         if len(lst_of_lst) > 0:
             assert hasattr(lst_of_lst[0], sort_key), f"Primary key '{sort_key}' not found in {type(lst_of_lst[0])} members."
-        self.reset_index = reset_index
+        self._reset_index = reset_index
         self.length = length
         self.set_lst_of_lst(lst_of_lst)
         
     def set_lst_of_lst(self, new_val:List[List]):
         try:
-            self.lst_of_lst = list(set(new_val))
+            self._lst_of_lst = list(set(new_val))
         except Exception as e:
             print(f"Error in set_lst_of_lst: {e}")
             raise e
-        self.order()
+        self.__order()
         
-    def order(self, *, by:str=None):
+    def __order(self, *, by:str=None):
         if by is None:
-            by = self.by
+            by = self._order_by
         else:
-            self.by = by
-        self.lst_of_lst.sort(key=lambda x: getattr(x, by))
-        self.bisect_breakpoints = []
+            self._order_by = by
+        self._lst_of_lst.sort(key=lambda x: getattr(x, by))
+        self._bisect_breakpoints = []
         start = 0
-        for index, child in enumerate(self.lst_of_lst):
-            if isinstance(self.reset_index, str) and hasattr(child, self.reset_index): setattr(child, self.reset_index, index)
+        for index, child in enumerate(self._lst_of_lst):
+            if isinstance(self._reset_index, str) and hasattr(child, self._reset_index): setattr(child, self._reset_index, index)
             start += len(child)
-            self.bisect_breakpoints.append(start)
-        self.left_bps = [0] + self.bisect_breakpoints[:-1]
-        self.right_bps = list(map(lambda x: x-0.5, self.bisect_breakpoints))
+            self._bisect_breakpoints.append(start)
+        self._left_bps = [0] + self._bisect_breakpoints[:-1]
+        self._right_bps = list(map(lambda x: x-0.5, self._bisect_breakpoints))
         
-    def get_next_idx(self, index:int)->tuple:
-        next_idx = bisect_left(self.right_bps, index)
-        new_idx = index - self.left_bps[next_idx]
+    def get_next_node_idx(self, index:int)->tuple:
+        next_idx = bisect_left(self._right_bps, index)
+        new_idx = index - self._left_bps[next_idx]
         return next_idx, new_idx
         
-    def find_in_next(self, index)->tuple:
-        next_idx, new_idx = self.get_next_idx(index)
-        return self.lst_of_lst[next_idx][new_idx]
+    def find_in_next_node(self, index)->tuple:
+        next_idx, new_idx = self.get_next_node_idx(index)
+        return self._lst_of_lst[next_idx][new_idx]
     
     def has_next(self):
-        if len(self.lst_of_lst) > 0:
+        if len(self._lst_of_lst) > 0:
             return True
         else:
             return False
@@ -97,8 +97,8 @@ class BisectList(ABC):
     def __len__(self) -> int:
         if self.length is not None:
             return self.length
-        elif self.lst_of_lst:
-            return sum(len(c) for c in self.lst_of_lst)
+        elif self._lst_of_lst:
+            return sum(len(c) for c in self._lst_of_lst)
         else:
             print("Unknown length.")
             return 0

@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import List, Union
 from copy import deepcopy
+import gc
 
 import torch
 import torchaudio
@@ -40,18 +41,18 @@ class DataSourceBase(BisectList, ABC):
         raise AttributeError("不能修改标签的id！")
     
     @property
-    def childs(self):
-        return self.lst_of_lst
+    def childs(self) -> List['DataSourceBase']:
+        return self._lst_of_lst
     
     @property
-    def childs_info(self):
-        return [c.name for c in self.childs]
+    def childs_info(self) -> dict:
+        return {c.name:len(c) for c in self.childs}
     
     def add_child(self, child: 'DataSourceBase'):
-        self.set_lst_of_lst(self.lst_of_lst + [deepcopy(child)])
+        self.set_lst_of_lst(self._lst_of_lst + [deepcopy(child)])
         
     def get_child(self, index_or_name:Union[str,int]) -> 'DataSourceBase':
-        return deepcopy(get_child(index_or_name, self.lst_of_lst))
+        return deepcopy(get_child(index_or_name, self._lst_of_lst))
         
     def get_childs(self, index_or_lst:Union[str,int,List[Union[str,int]]]) -> List['DataSourceBase']:
         if isinstance(index_or_lst, list):
@@ -69,6 +70,29 @@ class DataSourceBase(BisectList, ABC):
             ret['childs'] =  [child.to_dict() for child in self.childs]
         return ret
     
+    def check_validation(self):
+        '''
+        检查数据集是否存在重复文件，以及文件是否存在
+        '''
+        try:
+            ret = False
+            results = []
+            not_exists = []
+            for i in range(len(self)):
+                results.append(self[i])
+                if not os.path.exists(self[i]):
+                    not_exists.append(self[i])
+            if len(not_exists) > 0:
+                raise FileNotFoundError(f"文件不存在：{','.join(not_exists)}")
+            if not len(set(results)) == len(self):
+                raise ValueError("数据集中存在重复文件！")
+            ret = True
+            return ret
+        finally:
+            del results
+            del not_exists
+            gc.collect()             
+    
     @abstractmethod
     def get_file_path(self, index):
         raise NotImplementedError()
@@ -77,7 +101,7 @@ class DataSourceBase(BisectList, ABC):
         if index < 0: index += len(self)
         assert index < len(self), f"Index {index} out of range: max = {len(self)-1}"
         if self.has_next():
-            return self.find_in_next(index)
+            return self.find_in_next_node(index)
         else:
             # return os.path.join(self.base_dir, self.get_file_path(index)), self.name, self.label
             return os.path.join(self.base_dir, self.get_file_path(index))
@@ -114,7 +138,7 @@ class Label(BisectList):
     
     @property
     def sources(self):
-        return self.lst_of_lst
+        return self._lst_of_lst
     
     def add_sources(self, sources:Union[DataSourceBase, List[DataSourceBase]]):
         if isinstance(sources, DataSourceBase):
@@ -129,7 +153,7 @@ class Label(BisectList):
     def __getitem__(self, index):
         if index < 0: index += len(self)
         assert index < len(self), f"Index {index} out of range: max = {len(self)-1}"
-        return self.find_in_next(index)
+        return self.find_in_next_node(index)
     
     def __repr__(self):
         return f"Label(id={self.id}, name='{self.name}', sources={self.sources})"

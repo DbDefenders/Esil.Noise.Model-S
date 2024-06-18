@@ -204,7 +204,7 @@ class DatasetBase(ABC, torch.utils.data.Dataset):
         # 提取音频特征
         if self.extractor is not None:
             feature = self.extractor(signal)
-        return feature, label
+        return feature, label, index
 
     
     

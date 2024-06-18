@@ -6,7 +6,7 @@ class _Config:
     
     def load_config(self):
         with open(self.config_path, 'r', encoding='utf-8') as f:
-            configs = yaml.safe_load(f)
+            configs = yaml.load(f, Loader=yaml.FullLoader)
             
         return configs
     

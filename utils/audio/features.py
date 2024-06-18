@@ -15,6 +15,10 @@ class FeatureType(Enum):
 def get_feature_transformer(feature_type: Union[str, FeatureType], **kwargs):
     if isinstance(feature_type, str):
         feature_type = FeatureType[feature_type.upper()]
+        
+    for k,v in kwargs.items():
+        if v == "None":
+            kwargs[k] = None
     if feature_type == FeatureType.SPECTROGRAM:
         return get_spectrogram_transformer(**kwargs)
     elif feature_type == FeatureType.MEL_SPECTROGRAM:

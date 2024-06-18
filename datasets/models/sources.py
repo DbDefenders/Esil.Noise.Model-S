@@ -142,3 +142,61 @@ class ProvinceDataSource(DataSourceBase):
     def __repr__(self):
         properties = ["base_dir", "name", "label", "length", "childs", "parent"]
         return create_repr_str(self, properties)
+
+
+
+
+
+
+class BirdclefDataSource(DataSourceBase):
+    def __init__(
+        self,
+        meta_file: str,  # 元数据文件的路径
+        base_dir: str,  # 数据的基目录
+        name: str = "Birdclef",  # 数据源的名称
+        label: int = None,  # 用于过滤的标签（类别ID）
+        length: int = None,  # 数据源中的数据点数量
+    ):
+        self.meta_file = meta_file  # 将meta_file参数赋值给实例变量
+
+        childs = None  # 初始化childs变量，用于存储子数据源 
+        annotations = pd.read_csv(self.meta_file)  # 读取元数据文件
+        annotations["id"] = annotations["id"].astype(int)  # 将id列的数据类型设置为int
+        annotations = (  # 根据label过滤注释，如果没有提供label，则使用所有注释
+            annotations[annotations["id"] == label]
+            if label is not None
+            else annotations
+        )
+        classes = annotations["id"].unique()  # 获取所有唯一的类别ID
+        if len(classes) > 1:  # 如果有多个类别
+            classes.sort()  # 对类别进行排序
+            childs = []  # 初始化childs列表
+            for t in classes:  # 遍历每个类别
+                tmp = annotations[annotations["id"] == t]  # 过滤出当前类别的注释
+                childs.append(  # 将新的数据源添加到childs列表
+                    BirdclefDataSource(
+                        base_dir=base_dir,  # 基目录
+                        meta_file=meta_file,  # 元数据文件
+                        name=tmp.iloc[0]["primary_label"],  # 使用类别的名称
+                        length=len(tmp),  # 使用当前类别的数据点数量
+                        label=t,  # 使用当前类别的标签
+                    )
+                )
+
+        super().__init__(  # 调用基类的初始化方法
+            base_dir=base_dir,  # 基目录
+            name=name,  # 数据源名称
+            label=label,  # 标签
+            length=length,  # 数据点数量
+            childs=childs  # 子数据源
+        )
+
+    def get_file_path(self, index: int) -> str:  # 定义一个方法来获取文件路径
+        df = pd.read_csv(self.meta_file)  # 重新读取元数据文件
+        ret = df[df["id"] == self.id].reindex().iloc[index]
+        print(os.path.join(f'train_audio', ret["filename"]))# 根据索引获取特定的记录
+        return os.path.join(f'train_audio', ret["filename"]) # 构建并返回文件路径
+
+    def __repr__(self):  # 定义对象的字符串表示
+        properties = ["meta_file", "base_dir", "name", "label", "length", "childs"]  # 要包含在表示中的属性列表
+        return create_repr_str(self, properties)  # 调用一个辅助函数来创建字符串表示

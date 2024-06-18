@@ -116,7 +116,7 @@ class CustomDatasource(DataSourceBase):
 ```python
 CUSTOM = CustomDatasource(**datasources_info['Custom'], **other_kwargs)
 
-# __all__.append("CUSTOM"])
+# __all__.append("CUSTOM")
 ```
 
 ## 数据集的创建流程

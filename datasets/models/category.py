@@ -7,7 +7,13 @@ from sklearn.model_selection import train_test_split
 from .base import DataSourceBase
 from .label import Label
 from utils.common import BisectList, get_child
-
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+font_path = 'static/fonts/SimHei.ttf'  # 替换为 SimHei 字体的实际路径
+fm.fontManager.addfont(font_path)
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置默认字体
+plt.rcParams['axes.unicode_minus'] = False 
 class Category(BisectList):
     def __init__(self, name:str, labels:list[Union[Label, DataSourceBase]]):
         labels = deepcopy(labels)
@@ -29,7 +35,48 @@ class Category(BisectList):
     def labels_info(self)->list:
         '''标签信息'''
         return [{'id':l.id, 'name':l.name, "length":len(l)} for l in self.labels]
+
+    
+
+    def labels_barplt(self,legend_tag:bool=False) -> plt.Figure:
+        '''标签柱状图'''
+        # 准备数据
+        ids, lengths, names = zip(*[(l.id, len(l), l.name) for l in self.labels])
         
+        # 创建柱状图
+        fig, ax = plt.subplots(figsize=(20, 12))  # 使用 subplots() 获取 figure 和 axis 对象
+        bars = ax.bar(ids, lengths)  # 使用标签 id 作为 x 轴
+
+        # 设置标题和轴标签
+        ax.set_title('Labels Info')
+        ax.set_xlabel('Label ID')
+        ax.set_ylabel('Frequency')
+
+        if legend_tag:
+            # 为每个条形添加图例标签
+            ax.bar_label(bars, labels=names, label_type='edge')
+            # 添加图例
+            ax.legend(bars, names)
+
+        # 返回 figure 对象，以便于进一步操作
+        return fig
+    def labels_scatterplt(self,legend_tag:bool=False) -> plt.Figure:
+        ids, lengths, names = zip(*[(l.id, len(l), l.name) for l in self.labels])
+        
+        # 创建散点图
+        fig, ax = plt.subplots(figsize=(12, 6))
+        scatter = ax.scatter(ids, lengths)
+
+        # 设置标题和轴标签
+        ax.set_title('Labels Info Scatter')
+        ax.set_xlabel('Label ID')
+        ax.set_ylabel('Frequency')
+        if legend_tag:
+            # 为每个点添加标签（如果数据点不是很多的话）
+            for i, txt in enumerate(names):
+                ax.annotate(txt, (ids[i], lengths[i]))
+
+        return fig
     def get_label(self, index):
         return get_child(index, self.labels)
     

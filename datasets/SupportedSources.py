@@ -6,6 +6,7 @@ from .models.sources import (
     BirdclefDataSource,
 )
 from functools import lru_cache
+
 from utils import config
 from enum import Enum
 
@@ -35,4 +36,3 @@ def get_data_source(source_type: SupportedSourceTypes)->DataSourceBase:
     :return: 数据源实例
     '''
     return source_type.value["class"](**source_type.value["args"])
-    

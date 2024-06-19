@@ -15,7 +15,6 @@ class ESC50DataSource(DataSourceBase):
         length: int = None,
     ):
         self.meta_file = meta_file
-
         childs = None
         if dataframe is None:
             dataframe = pd.read_csv(meta_file)
@@ -69,7 +68,6 @@ class US8KDataSource(DataSourceBase):
         length: int = None,
     ):
         self.meta_file = meta_file
-
         childs = None
         if dataframe is None:
             dataframe = pd.read_csv(meta_file)
@@ -152,7 +150,7 @@ class ProvinceDataSource(DataSourceBase):
     def __repr__(self):
         properties = ["base_dir", "name", "label", "length", "childs", "parent"]
         return create_repr_str(self, properties)
-    
+
 class BirdclefDataSource(DataSourceBase):
     def __init__(
         self,
@@ -164,7 +162,6 @@ class BirdclefDataSource(DataSourceBase):
         length: int = None,  # 数据源中的数据点数量
     ):
         self.meta_file = meta_file  # 将meta_file参数赋值给实例变量
-
         childs = None  # 初始化childs变量，用于存储子数据源
         if dataframe is None:
             dataframe = pd.read_csv(self.meta_file)

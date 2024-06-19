@@ -47,7 +47,26 @@ class Trainer(ModelManager):
         else:
             self.scaler = None
 
-    def train_an_epoch(self)->float:
+    def save_optimizer(self, save_path)->str:
+        torch.save(self.optimizer.state_dict(), save_path)
+        return save_path
+        
+    def reload_optimizer(self, optimizer_path, scheduler: torch.optim.lr_scheduler.LRScheduler = None)->'Trainer':
+        optimizer_state_dict = torch.load(optimizer_path)
+        self.optimizer.load_state_dict(optimizer_state_dict)
+        if scheduler is None:
+            scheduler = torch.optim.lr_scheduler.StepLR(
+                optimizer=self.optimizer, step_size=10, gamma=0.1
+            )
+        self.scheduler = scheduler
+        return self
+    
+    def reload_trainer(self, model_path, optimizer_path)->'Trainer':
+        self.load_model(model_path)
+        self.reload_optimizer(optimizer_path)
+        return self
+
+    def train_an_epoch(self, tqdm_instance:tqdm=None)->float:
         """
         启动一个训练周期
         """
@@ -84,6 +103,8 @@ class Trainer(ModelManager):
 
             del features, labels, pred, loss  # 手动删除变量以释放内存
             gc.collect()  # 手动调用垃圾回收器以释放内存
+            if tqdm_instance is not None:
+                tqdm_instance.set_description(f"[train] loss: {training_loss/count:.4f} Progress: {count}/{len(self.training_dataloader)}")
 
         training_loss /= len(self.training_dataloader)  # 计算平均训练损失
         return training_loss

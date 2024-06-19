@@ -7,16 +7,19 @@ from .base import DataSourceBase
 class ESC50DataSource(DataSourceBase):
     def __init__(
         self,
-        meta_file: str,
         base_dir: str,
+        meta_file: str = "static/meta_file/esc50.csv",
+        dataframe: pd.DataFrame = None,
         name: str = "ESC50",
         label: int = None,
         length: int = None,
     ):
         self.meta_file = meta_file
-        self.df = pd.read_csv(meta_file)
         childs = None
-        annotations = pd.read_csv(meta_file)
+        if dataframe is None:
+            dataframe = pd.read_csv(meta_file)
+        self.__dataframe__ = dataframe
+        annotations = self.__dataframe__
         annotations["target"] = annotations["target"].astype(int)
         annotations = (
             annotations[annotations["target"] == label]
@@ -33,6 +36,7 @@ class ESC50DataSource(DataSourceBase):
                     ESC50DataSource(
                         meta_file=meta_file,
                         base_dir=base_dir,
+                        dataframe=self.__dataframe__,
                         name=tmp.iloc[0]["category"],
                         label=t,
                         length=len(tmp),
@@ -44,7 +48,7 @@ class ESC50DataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:
-        df = self.df
+        df = self.__dataframe__
         ret = df[df["target"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["filename"])
 
@@ -56,16 +60,19 @@ class ESC50DataSource(DataSourceBase):
 class US8KDataSource(DataSourceBase):
     def __init__(
         self,
-        meta_file: str,
         base_dir: str,
+        meta_file: str = "static/meta_file/UrbanSound8K.csv",
+        dataframe: pd.DataFrame = None,
         name: str = "US8K",
         label: int = None,
         length: int = None,
     ):
         self.meta_file = meta_file
-        self.df = pd.read_csv(meta_file)
         childs = None
-        annotations = pd.read_csv(meta_file)
+        if dataframe is None:
+            dataframe = pd.read_csv(meta_file)
+        self.__dataframe__ = dataframe
+        annotations = self.__dataframe__
         annotations["classID"] = annotations["classID"].astype(int)
         annotations = (
             annotations[annotations["classID"] == label]
@@ -82,6 +89,7 @@ class US8KDataSource(DataSourceBase):
                     US8KDataSource(
                         base_dir=base_dir,
                         meta_file=meta_file,
+                        dataframe=self.__dataframe__,
                         name=tmp.iloc[0]["class"],
                         length=len(tmp),
                         label=t,
@@ -93,7 +101,7 @@ class US8KDataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:
-        df = self.df
+        df = self.__dataframe__
         ret = df[df["classID"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["slice_file_name"])
 
@@ -106,7 +114,7 @@ class ProvinceDataSource(DataSourceBase):
     def __init__(
         self,
         base_dir: str,
-        meta_file: str,
+        meta_file: str = "static/meta_file/province.json",
         *,
         name: str,
         label: int = None,
@@ -143,23 +151,21 @@ class ProvinceDataSource(DataSourceBase):
         properties = ["base_dir", "name", "label", "length", "childs", "parent"]
         return create_repr_str(self, properties)
 
-
-
-
-
-
 class BirdclefDataSource(DataSourceBase):
     def __init__(
         self,
-        meta_file: str,  # 元数据文件的路径
-        base_dir: str,  # 数据的基目录
+        base_dir: str,  # 数据的基目录        
+        meta_file: str = "static/meta_file/Birdclef.csv",  # 元数据文件的路径
         name: str = "Birdclef",  # 数据源的名称
+        dataframe: pd.DataFrame = None,  # 元数据文件的内容，可以直接提供，也可以通过meta_file参数读取
         label: int = None,  # 用于过滤的标签（类别ID）
         length: int = None,  # 数据源中的数据点数量
     ):
         self.meta_file = meta_file  # 将meta_file参数赋值给实例变量
-        self.df = pd.read_csv(meta_file)
-        childs = None  # 初始化childs变量，用于存储子数据源 
+        childs = None  # 初始化childs变量，用于存储子数据源
+        if dataframe is None:
+            dataframe = pd.read_csv(self.meta_file)
+        self.__dataframe__ = dataframe
         annotations = pd.read_csv(self.meta_file)  # 读取元数据文件
         annotations["id"] = annotations["id"].astype(int)  # 将id列的数据类型设置为int
         annotations = (  # 根据label过滤注释，如果没有提供label，则使用所有注释
@@ -177,6 +183,7 @@ class BirdclefDataSource(DataSourceBase):
                     BirdclefDataSource(
                         base_dir=base_dir,  # 基目录
                         meta_file=meta_file,  # 元数据文件
+                        dataframe=self.__dataframe__,
                         name=tmp.iloc[0]["primary_label"],  # 使用类别的名称
                         length=len(tmp),  # 使用当前类别的数据点数量
                         label=t,  # 使用当前类别的标签
@@ -192,7 +199,7 @@ class BirdclefDataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:  # 定义一个方法来获取文件路径
-        df = self.df  # 重新读取元数据文件
+        df = self.__dataframe__
         ret = df[df["id"] == self.id].reindex().iloc[index]
         return os.path.join(f'train_audio', ret["filename"]) # 构建并返回文件路径
 

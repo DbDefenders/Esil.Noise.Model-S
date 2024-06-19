@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import torchaudio.transforms as T
 from PIL import Image
 from io import BytesIO
-import wandb
+from copy import deepcopy
+
 import matplotlib
 matplotlib.use('Agg')
 plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
@@ -118,15 +119,14 @@ def plot_fbank(fbank, title=None):
     axs.set_xlabel("mel bin")
     return fig
 
-def plt2ndarray(figure):
-    buf = BytesIO() 
-    figure.savefig(buf, format="jpg") # 将 Matplotlib 图像保存到内存中的一个缓冲区
-    buf.seek(0)
-    image = Image.open(buf) # 使用 Pillow 打开缓冲区中的图像
-    image_array = np.array(image) # 将 Pillow 图像转换为 NumPy 数组
-    buf.close() # 关闭缓冲区
-    return image_array # jpg: RGB, png: RGBA
-
-def plt2wandbImage(figure):
-    arr = plt2ndarray(figure)
-    return wandb.Image(arr, mode="RGB")
+def plt2ndarray(figure, format="jpg"):
+    try:
+        assert format in ["jpg", "png"]
+        buf = BytesIO() 
+        figure.savefig(buf, format=format) # 将 Matplotlib 图像保存到内存中的一个缓冲区
+        buf.seek(0)
+        image = Image.open(buf) # 使用 Pillow 打开缓冲区中的图像
+        image_array = np.array(image) # 将 Pillow 图像转换为 NumPy 数组
+        return deepcopy(image_array) # jpg: RGB, png: RGBA
+    finally:
+        buf.close() # 关闭缓冲区

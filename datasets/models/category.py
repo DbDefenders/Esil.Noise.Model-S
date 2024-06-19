@@ -1,5 +1,6 @@
 from typing import Union
 from collections import Counter
+from copy import deepcopy
 
 from sklearn.model_selection import train_test_split
 
@@ -15,6 +16,7 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置默认字体
 plt.rcParams['axes.unicode_minus'] = False 
 class Category(BisectList):
     def __init__(self, name:str, labels:list[Union[Label, DataSourceBase]]):
+        labels = deepcopy(labels)
         for i, l in enumerate(labels):
             if isinstance(l, DataSourceBase):
                 labels[i] = l.to_label()

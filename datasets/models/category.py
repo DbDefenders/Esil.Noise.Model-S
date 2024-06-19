@@ -6,9 +6,13 @@ from sklearn.model_selection import train_test_split
 from .base import DataSourceBase
 from .label import Label
 from utils.common import BisectList, get_child
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-import numpy as np
+font_path = 'static/fonts/SimHei.ttf'  # 替换为 SimHei 字体的实际路径
+fm.fontManager.addfont(font_path)
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置默认字体
+plt.rcParams['axes.unicode_minus'] = False 
 class Category(BisectList):
     def __init__(self, name:str, labels:list[Union[Label, DataSourceBase]]):
         for i, l in enumerate(labels):
@@ -33,11 +37,6 @@ class Category(BisectList):
     
 
     def labels_barplt(self,legend_tag:bool=False) -> plt.Figure:
-        font_path = 'utils/fonts/SimHei.ttf'  # 替换为 SimHei 字体的实际路径
-        fm.fontManager.addfont(font_path)
-
-        plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置默认字体
-        plt.rcParams['axes.unicode_minus'] = False 
         '''标签柱状图'''
         # 准备数据
         ids, lengths, names = zip(*[(l.id, len(l), l.name) for l in self.labels])
@@ -60,11 +59,6 @@ class Category(BisectList):
         # 返回 figure 对象，以便于进一步操作
         return fig
     def labels_scatterplt(self,legend_tag:bool=False) -> plt.Figure:
-        font_path = 'utils/fonts/SimHei.ttf'  # 替换为 SimHei 字体的实际路径
-        fm.fontManager.addfont(font_path)
-        plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置默认字体
-        plt.rcParams['axes.unicode_minus'] = False 
-
         ids, lengths, names = zip(*[(l.id, len(l), l.name) for l in self.labels])
         
         # 创建散点图

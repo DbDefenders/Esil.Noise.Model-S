@@ -2,13 +2,12 @@ DataSources:
 # 数据源，linux下路径中要用“/”,不能用“\”
   US8K:
     base_dir: c:\us8k
-    meta_file: static\meta_file\UrbanSound8K.csv
   ESC50:
     base_dir: c:\esc50
-    meta_file: static\meta_file\esc50.csv
   Province:
     base_dir: \\10.166.168.123\典型城市声纹数据库-标签过
-    meta_file: static\meta_file\province.json
+  Birdclef:
+    base_dir: \\10.166.168.123\BirdClef2021
 Features:
   SPECTROGRAM:
     n_fft: 1024

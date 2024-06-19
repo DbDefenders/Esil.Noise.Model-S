@@ -47,6 +47,20 @@ class Trainer(ModelManager):
         else:
             self.scaler = None
 
+    def save_optimizer(self, save_path)->str:
+        torch.save(self.optimizer.state_dict(), save_path)
+        return save_path
+        
+    def reload_optimizer(self, optimizer_path)->'Trainer':
+        optimizer_state_dict = torch.load(optimizer_path)
+        self.optimizer.load_state_dict(optimizer_state_dict)
+        return self
+    
+    def reload_trainer(self, model_path, optimizer_path)->'Trainer':
+        self.load_model(model_path)
+        self.reload_optimizer(optimizer_path)
+        return self
+
     def train_an_epoch(self)->float:
         """
         启动一个训练周期

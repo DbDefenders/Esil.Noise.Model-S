@@ -8,6 +8,7 @@ import torchmetrics.functional.classification as tmf
 
 from .base import ModelManager, DEVICE
 from .trainer import Trainer
+from ..decorators import tensor_to_number
 
 class TestMetrics(BaseModel):
     # 测试指标
@@ -83,7 +84,7 @@ class Tester(ModelManager):
         if func is None:
             return None
         else:
-            return lambda preds, targets: (
+            metrics_func =  lambda preds, targets: (
                 func(
                     preds,
                     targets,
@@ -92,6 +93,7 @@ class Tester(ModelManager):
                     average=average,
                 )
             )
+            return tensor_to_number(metrics_func)
 
     def test_an_epoch(self, get_file_path: callable = None)->tuple[TestMetrics, wandb.Table]:
         """
@@ -153,18 +155,23 @@ class Tester(ModelManager):
 
         # region 计算auc,prec,rec,acc
         if self.auc_func is not None:
-            metrics_.auc = self.auc_func(preds_tensor, targets_tensor)
+            auc = self.auc_func(preds_tensor, targets_tensor)
+            metrics_.auc = auc.item() if isinstance(auc, torch.Tensor) else auc
         if self.prec_func is not None:
-            metrics_.precision = self.prec_func(preds_tensor, targets_tensor)
+            precision = self.prec_func(preds_tensor, targets_tensor)
+            metrics_.precision = precision.item() if isinstance(precision, torch.Tensor) else precision
         if self.recall_func is not None:
-            metrics_.recall = self.recall_func(preds_tensor, targets_tensor)
+            recall = self.recall_func(preds_tensor, targets_tensor)
+            metrics_.recall = recall.item() if isinstance(recall, torch.Tensor) else recall
         if self.acc_func is not None:
-            metrics_.accuracy = self.acc_func(preds_tensor, targets_tensor)
+            accuracy = self.acc_func(preds_tensor, targets_tensor)
+            metrics_.accuracy = accuracy.item() if isinstance(accuracy, torch.Tensor) else accuracy
         # endregion
 
         # region 计算f1_score
         if self.f1_score_func is not None:
-            metrics_.f1_score = self.f1_score_func(preds_argmax, targets_tensor)
+            f1_score = self.f1_score_func(preds_argmax, targets_tensor)
+            
         if self.f1_score_micro_func is not None:
             metrics_.f1_score_micro = self.f1_score_micro_func(
                 preds_argmax, targets_tensor

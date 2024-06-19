@@ -8,3 +8,4 @@ test/**
 **pyc**
 test.ipynb
 configs.yml
+training/**

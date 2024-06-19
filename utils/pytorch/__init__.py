@@ -70,11 +70,11 @@ def initialization(training_dataloader):
 #endregion
 
 #region train
-def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, training_training_dataloader:torch.utils.data.training_dataloader, scheduler,scaler, loss_func,*args):
+def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, training_dataloader:torch.utils.data.DataLoader, scheduler,scaler, loss_func,*args):
     trainloss = 0; model.train()  # 初始化训练损失为0，并设置模型为训练模式
     count = 0  # 初始化计数器
 
-    for idx, (features, label) in enumerate(tqdm(training_training_dataloader,leave=False ,desc="[train]")):  # 遍历数据加载器，使用tqdm显示进度条
+    for idx, (features, label) in enumerate(tqdm(training_dataloader,leave=False ,desc="[train]")):  # 遍历数据加载器，使用tqdm显示进度条
         # label = label.reshape(-1, len(LABELS))  # 用于调整标签的形状
 
         features, label = features.to(device), label.to(
@@ -98,7 +98,7 @@ def train_an_epoch(model:torch.nn.Module, optimizer:torch.optim.Optimizer, train
         # if count == 300:
         # break  # 注释掉的代码，可能用于限制训练的批量数
         
-    trainloss /= len(training_training_dataloader)  # 计算平均训练损失
+    trainloss /= len(training_dataloader)  # 计算平均训练损失
     '''计算累加训练损失：在训练过程中，对于每个批次，我们都会计算模型的损失。通过累加这些损失，我们可以得到整个训练集的总损失。
     在训练周期结束时，我们将总损失除以训练集中的批次数量，得到平均损失。
     这个平均损失是评估模型在训练集上表现的一个重要指标。通过监控平均损失的变化，我们可以了解模型是否正在学习以及学习的效果如何。'''

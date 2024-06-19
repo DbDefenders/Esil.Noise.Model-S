@@ -14,7 +14,7 @@ class ESC50DataSource(DataSourceBase):
         length: int = None,
     ):
         self.meta_file = meta_file
-
+        self.df = pd.read_csv(meta_file)
         childs = None
         annotations = pd.read_csv(meta_file)
         annotations["target"] = annotations["target"].astype(int)
@@ -44,7 +44,7 @@ class ESC50DataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:
-        df = pd.read_csv(self.meta_file)
+        df = self.df
         ret = df[df["target"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["filename"])
 
@@ -63,7 +63,7 @@ class US8KDataSource(DataSourceBase):
         length: int = None,
     ):
         self.meta_file = meta_file
-
+        self.df = pd.read_csv(meta_file)
         childs = None
         annotations = pd.read_csv(meta_file)
         annotations["classID"] = annotations["classID"].astype(int)
@@ -93,7 +93,7 @@ class US8KDataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:
-        df = pd.read_csv(self.meta_file)
+        df = self.df
         ret = df[df["classID"] == self.id].reindex().iloc[index]
         return os.path.join(f'fold{ret["fold"]}', ret["slice_file_name"])
 
@@ -158,7 +158,7 @@ class BirdclefDataSource(DataSourceBase):
         length: int = None,  # 数据源中的数据点数量
     ):
         self.meta_file = meta_file  # 将meta_file参数赋值给实例变量
-
+        self.df = pd.read_csv(meta_file)
         childs = None  # 初始化childs变量，用于存储子数据源 
         annotations = pd.read_csv(self.meta_file)  # 读取元数据文件
         annotations["id"] = annotations["id"].astype(int)  # 将id列的数据类型设置为int
@@ -192,9 +192,8 @@ class BirdclefDataSource(DataSourceBase):
         )
 
     def get_file_path(self, index: int) -> str:  # 定义一个方法来获取文件路径
-        df = pd.read_csv(self.meta_file)  # 重新读取元数据文件
+        df = self.df  # 重新读取元数据文件
         ret = df[df["id"] == self.id].reindex().iloc[index]
-        print(os.path.join(f'train_audio', ret["filename"]))# 根据索引获取特定的记录
         return os.path.join(f'train_audio', ret["filename"]) # 构建并返回文件路径
 
     def __repr__(self):  # 定义对象的字符串表示

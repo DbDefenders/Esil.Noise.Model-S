@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from .base import DataSourceBase
 from .label import Label
 from utils.common import BisectList, get_child
-import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 font_path = 'static/fonts/SimHei.ttf'  # 替换为 SimHei 字体的实际路径
@@ -35,8 +35,11 @@ class Category(BisectList):
     def labels_info(self)->list:
         '''标签信息'''
         return [{'id':l.id, 'name':l.name, "length":len(l)} for l in self.labels]
-
     
+    @property
+    def labels_dataframe(self)->pd.DataFrame:
+        '''标签信息'''
+        return pd.DataFrame(self.labels_info)
 
     def labels_barplt(self,legend_tag:bool=False) -> plt.Figure:
         '''标签柱状图'''

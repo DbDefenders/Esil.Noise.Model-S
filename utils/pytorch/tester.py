@@ -1,3 +1,4 @@
+import gc
 import torch
 import pandas as pd
 import numpy as np
@@ -160,11 +161,10 @@ class Tester(ModelManager):
                         f"[valid] Progress: {count}/{len(self.testing_dataloader)}"
                     )
                     
-        outputs_tensor = torch.cat(outputs_lst, dim=0).cpu().detach()
-        targets_tensor = torch.cat(targets_lst, dim=0).cpu().detach()
+        outputs_tensor = torch.cat(outputs_lst, dim=0)
+        targets_tensor = torch.cat(targets_lst, dim=0)
         
         metrics_ = self.get_metrics(outputs_tensor, targets_tensor)
-        metrics_.loss = total_loss # 使用总损失作为loss
 
         if tqdm_instance is not None:
             tqdm_instance.set_description(
@@ -182,28 +182,36 @@ class Tester(ModelManager):
         
         # ======================== metrics ======================== #
         metrics_ = TestMetrics()
+        
+        try:
+            metrics_.loss = self.loss_func(outputs_tensor, targets_tensor).item()
 
-        # region 计算auc,prec,rec,acc
-        if self.auc_func is not None:
-            metrics_.auc = self.auc_func(outputs_tensor, targets_tensor) # 注意这里的pred=outputs_tensor
-        if self.prec_func is not None:
-            metrics_.precision = self.prec_func(preds_tensor, targets_tensor)
-        if self.recall_func is not None:
-            metrics_.recall = self.recall_func(preds_tensor, targets_tensor)
-        if self.acc_func is not None:
-            metrics_.accuracy = self.acc_func(preds_tensor, targets_tensor)
-        # endregion
+            # region 计算auc,prec,rec,acc
+            if self.auc_func is not None:
+                metrics_.auc = self.auc_func(outputs_tensor, targets_tensor) # 注意这里的pred=outputs_tensor
+            if self.prec_func is not None:
+                metrics_.precision = self.prec_func(preds_tensor, targets_tensor)
+            if self.recall_func is not None:
+                metrics_.recall = self.recall_func(preds_tensor, targets_tensor)
+            if self.acc_func is not None:
+                metrics_.accuracy = self.acc_func(preds_tensor, targets_tensor)
+            # endregion
 
-        # region 计算f1_score
-        if self.f1_score_func is not None:
-            metrics_.f1_score = self.f1_score_func(preds_tensor, targets_tensor)
-        if self.f1_score_micro_func is not None:
-            metrics_.f1_score_micro = self.f1_score_micro_func(
-                preds_tensor, targets_tensor
-            )
-        # endregion
+            # region 计算f1_score
+            if self.f1_score_func is not None:
+                metrics_.f1_score = self.f1_score_func(preds_tensor, targets_tensor)
+            if self.f1_score_micro_func is not None:
+                metrics_.f1_score_micro = self.f1_score_micro_func(
+                    preds_tensor, targets_tensor
+                )
+            # endregion
 
-        return metrics_
+            return metrics_
+        except Exception as e:
+            raise e
+        finally:
+            del outputs_tensor, targets_tensor, preds_tensor
+            gc.collect()
 
     @classmethod
     def from_trainer(

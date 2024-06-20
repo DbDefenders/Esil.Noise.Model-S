@@ -106,13 +106,6 @@ class Tester(ModelManager):
         """
         self.model.eval()  # 将模型设置为评估模式
 
-        columns = [
-            "index",
-            "Filename",
-            "label",
-            "y_pred",
-        ]  # idx, filepath, label, y_pred
-
         bad_cases = []
         preds, targets = [], []  # 初始化预测和目标列表
         with torch.no_grad():  # 在此上下文中，所有计算都不会跟踪梯度

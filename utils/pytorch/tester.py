@@ -106,8 +106,11 @@ class Tester(ModelManager):
         """
         self.model.eval()  # 将模型设置为评估模式
 
+        total_loss = 0.0
         bad_cases = []
-        preds, targets = [], []  # 初始化预测和目标列表
+        outputs_lst = []
+        targets_lst = []  # 初始化预测和目标列表
+
         with torch.no_grad():  # 在此上下文中，所有计算都不会跟踪梯度
             for count, (features, labels, idxes) in enumerate(
                 tqdm(self.testing_dataloader, leave=False, desc="[valid]"), start=1
@@ -115,55 +118,53 @@ class Tester(ModelManager):
                 # 将数据和标签移动到指定设备（如GPU）
                 features = features.to(self.device)
                 labels = labels.to(self.device)
-                if self.using_amp:  # 使用自动混合精度训练（如果启用）
+
+                # 使用自动混合精度训练（如果启用）
+                if self.using_amp:
                     with amp.autocast(True, dtype=torch.bfloat16):
-                        pred = self.model.forward(features)  # 通过模型前向传播
-                        preds.extend(pred.float().cpu().detach().numpy())
-                        targets.extend(labels.cpu().numpy())
-                else:  # 没有启用自动混合精度训练
-                    pred = self.model.forward(features)  # 通过模型前向传播
-                    preds.extend(pred.float().cpu().detach().numpy())
-                    targets.extend(labels.cpu().numpy())
+                        outputs = self.model.forward(features)
+                else:
+                    outputs = self.model.forward(features)
 
-                outputs = torch.softmax(pred, dim=1)
-                results = outputs.argmax(axis=1) == labels
-
-                # 使用wandb记录测试结果
+                outputs = torch.softmax(outputs, dim=1) # softmax
+                
+                outputs_lst.append(outputs)
+                targets_lst.append(labels)
+                
+                # 计算损失
+                loss = self.loss_func(outputs, labels)
+                total_loss += loss.item()
+                
+                pred = outputs.argmax(axis=1)
+                results = pred == labels
+                # 记录预测错误的结果
                 for i, result in enumerate(results):
-                    label = labels[i].item()
-                    y_pred = outputs.argmax(1)[i].cpu().numpy().item()
-                    idx = idxes[i].item()
-
-                    if get_file_path is not None:
-                        filepath = get_file_path(idx)
-                    else:
-                        filepath = None
-
-                    if get_label_name is not None:
-                        label_name = get_label_name(label)
-                        prediction = get_label_name(y_pred)
-                    else:
-                        label_name = None
-                        prediction = None
-
                     if not result:
-                        bad_cases.append(
-                            {
-                                "index": idx,
-                                "filepath": filepath,
-                                "label": label,
-                                "label_name": label_name,
-                                "y_pred": y_pred,
-                                "prediction": prediction,
-                            }
-                        )
+                        idx = idxes[i].item()
+                        label = labels[i].item()
+                        y_pred = pred[i].item()
+                        filepath = get_file_path(idx) if get_file_path else None
+                        label_name = get_label_name(label) if get_label_name else None
+                        prediction = get_label_name(y_pred) if get_label_name else None
+                        bad_cases.append({
+                            "index": idx,
+                            "filepath": filepath,
+                            "label": label,
+                            "label_name": label_name,
+                            "y_pred": y_pred,
+                            "prediction": prediction,
+                        })
 
                 if tqdm_instance is not None:
                     tqdm_instance.set_description(
                         f"[valid] Progress: {count}/{len(self.testing_dataloader)}"
                     )
                     
-        metrics_ = self.get_metrics(preds, targets)
+        outputs_tensor = torch.cat(outputs_lst, dim=0).cpu().detach()
+        targets_tensor = torch.cat(targets_lst, dim=0).cpu().detach()
+        
+        metrics_ = self.get_metrics(outputs_tensor, targets_tensor)
+        metrics_.loss = total_loss # 使用总损失作为loss
 
         if tqdm_instance is not None:
             tqdm_instance.set_description(
@@ -172,27 +173,19 @@ class Tester(ModelManager):
             
         return metrics_, pd.DataFrame(bad_cases)  # 返回测试指标, 坏样本列表
                     
-    def get_metrics(self, preds: list, targets: list)->TestMetrics:
+    def get_metrics(self, outputs_tensor: torch.Tensor, targets_tensor: torch.Tensor)->TestMetrics:
         '''
         获取测试指标
         '''
-        preds_tensor = torch.tensor(np.array(preds))
-        targets_tensor = torch.tensor(np.array(targets))
-        preds_argmax = preds_tensor.argmax(axis=1)  # 获取每个预测的最大概率索引
-
+        
+        preds_tensor = torch.argmax(outputs_tensor, dim=1)
+        
         # ======================== metrics ======================== #
         metrics_ = TestMetrics()
 
-        # region 计算loss
-        valid_loss = self.loss_func(preds_tensor, targets_tensor)  # 计算验证集损失
-        if isinstance(valid_loss, torch.Tensor):
-            valid_loss = valid_loss.item()
-        metrics_.loss = valid_loss
-        # endregion
-
         # region 计算auc,prec,rec,acc
         if self.auc_func is not None:
-            metrics_.auc = self.auc_func(preds_tensor, targets_tensor)
+            metrics_.auc = self.auc_func(outputs_tensor, targets_tensor) # 注意这里的pred=outputs_tensor
         if self.prec_func is not None:
             metrics_.precision = self.prec_func(preds_tensor, targets_tensor)
         if self.recall_func is not None:
@@ -203,10 +196,10 @@ class Tester(ModelManager):
 
         # region 计算f1_score
         if self.f1_score_func is not None:
-            metrics_.f1_score = self.f1_score_func(preds_argmax, targets_tensor)
+            metrics_.f1_score = self.f1_score_func(preds_tensor, targets_tensor)
         if self.f1_score_micro_func is not None:
             metrics_.f1_score_micro = self.f1_score_micro_func(
-                preds_argmax, targets_tensor
+                preds_tensor, targets_tensor
             )
         # endregion
 

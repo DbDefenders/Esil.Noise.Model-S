@@ -96,7 +96,10 @@ class Tester(ModelManager):
             return tensor_to_number(metrics_func)
 
     def test_an_epoch(
-        self, get_file_path: callable = None, get_label_name:callable = None, tqdm_instance: tqdm = None
+        self,
+        get_file_path: callable = None,
+        get_label_name: callable = None,
+        tqdm_instance: tqdm = None,
     ) -> tuple[TestMetrics, pd.DataFrame]:
         """
         启动一个测试周期
@@ -142,7 +145,7 @@ class Tester(ModelManager):
                         filepath = get_file_path(idx)
                     else:
                         filepath = None
-                        
+
                     if get_label_name is not None:
                         label_name = get_label_name(label)
                         prediction = get_label_name(y_pred)
@@ -158,12 +161,14 @@ class Tester(ModelManager):
                                 "label": label,
                                 "label_name": label_name,
                                 "y_pred": y_pred,
-                                "prediction": prediction
+                                "prediction": prediction,
                             }
                         )
 
                 if tqdm_instance is not None:
-                    tqdm_instance.set_description(f"[valid] Progress: {count}/{len(self.testing_dataloader)}")
+                    tqdm_instance.set_description(
+                        f"[valid] Progress: {count}/{len(self.testing_dataloader)}"
+                    )
         preds_tensor = torch.tensor(np.array(preds))
         targets_tensor = torch.tensor(np.array(targets))
         preds_argmax = preds_tensor.argmax(axis=1)  # 获取每个预测的最大概率索引
@@ -201,16 +206,17 @@ class Tester(ModelManager):
 
         # region 计算f1_score
         if self.f1_score_func is not None:
-            f1_score = self.f1_score_func(preds_argmax, targets_tensor)
-
+            metrics_.f1_score = self.f1_score_func(preds_argmax, targets_tensor)
         if self.f1_score_micro_func is not None:
             metrics_.f1_score_micro = self.f1_score_micro_func(
                 preds_argmax, targets_tensor
             )
         # endregion
-        
+
         if tqdm_instance is not None:
-            tqdm_instance.set_description(f"[valid] accuracy: {metrics_.accuracy:.4f}, loss: {metrics_.loss:.4f}")
+            tqdm_instance.set_description(
+                f"[valid] accuracy: {metrics_.accuracy:.4f}, loss: {metrics_.loss:.4f}"
+            )
         return metrics_, pd.DataFrame(bad_cases)  # 返回测试指标
 
         # ret = metrics_.model_dump()  # 序列化测试指标

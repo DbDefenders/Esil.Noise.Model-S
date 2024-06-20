@@ -150,4 +150,5 @@ CUSTOM = CustomDatasource(**datasources_info['Custom'], **other_kwargs)
 # Todo
 
 * [X] 自由搭配数据集
-* [ ] 模型训练与测试
+* [X] 模型训练与测试
+* [ ] 音频分析

@@ -162,6 +162,20 @@ class Tester(ModelManager):
                     tqdm_instance.set_description(
                         f"[valid] Progress: {count}/{len(self.testing_dataloader)}"
                     )
+                    
+        metrics_ = self.get_metrics(preds, targets)
+
+        if tqdm_instance is not None:
+            tqdm_instance.set_description(
+                f"[valid] accuracy: {metrics_.accuracy:.4f}, loss: {metrics_.loss:.4f}"
+            )
+            
+        return metrics_, pd.DataFrame(bad_cases)  # 返回测试指标, 坏样本列表
+                    
+    def get_metrics(self, preds: list, targets: list)->TestMetrics:
+        '''
+        获取测试指标
+        '''
         preds_tensor = torch.tensor(np.array(preds))
         targets_tensor = torch.tensor(np.array(targets))
         preds_argmax = preds_tensor.argmax(axis=1)  # 获取每个预测的最大概率索引
@@ -196,15 +210,7 @@ class Tester(ModelManager):
             )
         # endregion
 
-        if tqdm_instance is not None:
-            tqdm_instance.set_description(
-                f"[valid] accuracy: {metrics_.accuracy:.4f}, loss: {metrics_.loss:.4f}"
-            )
-        return metrics_, pd.DataFrame(bad_cases)  # 返回测试指标
-
-        # ret = metrics_.model_dump()  # 序列化测试指标
-
-        # return {k: v for k, v in ret.items() if v is not None}
+        return metrics_
 
     @classmethod
     def from_trainer(

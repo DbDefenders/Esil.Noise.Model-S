@@ -53,7 +53,7 @@ class ESC50DataSource(DataSourceBase):
         return os.path.join(f'fold{ret["fold"]}', ret["filename"])
 
     def __repr__(self):
-        properties = ["meta_file", "base_dir", "name", "label", "length", "childs"]
+        properties = ["name", "label", "length", "childs"]
         return create_repr_str(self, properties)
 
 
@@ -106,7 +106,7 @@ class US8KDataSource(DataSourceBase):
         return os.path.join(f'fold{ret["fold"]}', ret["slice_file_name"])
 
     def __repr__(self):
-        properties = ["meta_file", "base_dir", "name", "label", "length", "childs"]
+        properties = ["name", "label", "length", "childs"]
         return create_repr_str(self, properties)
 
 
@@ -148,7 +148,7 @@ class ProvinceDataSource(DataSourceBase):
         )
 
     def __repr__(self):
-        properties = ["base_dir", "name", "label", "length", "childs", "parent"]
+        properties = ["name", "label", "length", "childs", "parent"]
         return create_repr_str(self, properties)
 
 class BirdclefDataSource(DataSourceBase):
@@ -204,5 +204,5 @@ class BirdclefDataSource(DataSourceBase):
         return os.path.join(f'train_audio', ret["filename"]) # 构建并返回文件路径
 
     def __repr__(self):  # 定义对象的字符串表示
-        properties = ["meta_file", "base_dir", "name", "label", "length", "childs"]  # 要包含在表示中的属性列表
+        properties = ["name", "label", "length", "childs"]  # 要包含在表示中的属性列表
         return create_repr_str(self, properties)  # 调用一个辅助函数来创建字符串表示

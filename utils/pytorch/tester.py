@@ -185,23 +185,13 @@ class Tester(ModelManager):
 
         # region 计算auc,prec,rec,acc
         if self.auc_func is not None:
-            auc = self.auc_func(preds_tensor, targets_tensor)
-            metrics_.auc = auc.item() if isinstance(auc, torch.Tensor) else auc
+            metrics_.auc = self.auc_func(preds_tensor, targets_tensor)
         if self.prec_func is not None:
-            precision = self.prec_func(preds_tensor, targets_tensor)
-            metrics_.precision = (
-                precision.item() if isinstance(precision, torch.Tensor) else precision
-            )
+            metrics_.precision = self.prec_func(preds_tensor, targets_tensor)
         if self.recall_func is not None:
-            recall = self.recall_func(preds_tensor, targets_tensor)
-            metrics_.recall = (
-                recall.item() if isinstance(recall, torch.Tensor) else recall
-            )
+            metrics_.recall = self.recall_func(preds_tensor, targets_tensor)
         if self.acc_func is not None:
-            accuracy = self.acc_func(preds_tensor, targets_tensor)
-            metrics_.accuracy = (
-                accuracy.item() if isinstance(accuracy, torch.Tensor) else accuracy
-            )
+            metrics_.accuracy = self.acc_func(preds_tensor, targets_tensor)
         # endregion
 
         # region 计算f1_score

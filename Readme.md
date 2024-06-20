@@ -133,19 +133,17 @@ CUSTOM = CustomDatasource(**datasources_info['Custom'], **other_kwargs)
 
 > sources -> labels -> category -> dataset_factory -> train_data, test_data
 
-> 参考: "test_dataset_factory.ipynb"
+> 参考: "03exp_dataset_factory.ipynb"
 
 # Documents of utils
 
 ## wlog
 
-### class LogFileType : wandb files type
-
-### class WandbLogger: logger with wandb
-
 ## pytorch
 
 ### initialization 初始化模型、优化器、缩放器、损失器
+
+> 模型训练参考："06exp_trainer_tester.ipynb"
 
 # Todo
 

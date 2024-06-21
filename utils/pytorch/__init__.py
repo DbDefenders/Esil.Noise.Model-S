@@ -3,8 +3,8 @@
 # Created on: 2024-06-11 10:49:21
 # Description: utils for pytorch
 
-# from .trainer import Trainer
-# from .tester import Tester
+from .trainer import Trainer
+from .tester import Tester
 
 __all__ = ["Trainer", "Tester"]
 

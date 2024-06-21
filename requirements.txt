@@ -10,3 +10,4 @@ gradio
 scikit-learn
 torchmetrics
 pympler
+torchsummary

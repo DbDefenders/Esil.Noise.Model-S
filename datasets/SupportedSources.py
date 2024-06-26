@@ -1,3 +1,4 @@
+from typing import Union
 from .models.base import DataSourceBase
 from .models.sources import (
     US8KDataSource,
@@ -28,11 +29,13 @@ class SupportedSourceTypes(Enum):
     CONSTRUCTIONAL = {"class": ProvinceDataSource, "args":{**datasources_info["Province"], "name":"建筑施工噪声"}}
     
 @lru_cache(maxsize=len(SupportedSourceTypes))
-def get_data_source(source_type: SupportedSourceTypes)->DataSourceBase:
+def get_data_source(source_type: Union[str,SupportedSourceTypes])->DataSourceBase:
     '''
     按需获取指定数据源的实例
     
     :param source_type: 数据源类型
     :return: 数据源实例
     '''
+    if isinstance(source_type, str):
+        source_type = SupportedSourceTypes[source_type.upper()]
     return source_type.value["class"](**source_type.value["args"])

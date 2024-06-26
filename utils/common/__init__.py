@@ -4,23 +4,40 @@ from typing import List
 from abc import ABC, abstractmethod
 from bisect import bisect_left
 from functools import singledispatch
+from IPython.display import clear_output
 
+
+__all__ = [
+    'clear_jupyter',
+    'create_repr_str',
+    'get_child',
+    'BisectList',
+    'save_json'
+]
+
+def clear_jupyter():
+    try:
+        clear_output()
+    finally:
+        pass
+    
 def create_repr_str(obj, properties:list):
     """
     Returns a string representation of an object with specified properties.
     """
     info_str = []
     for i in properties:
-        if i is not None:
-            val = getattr(obj, i)
-            if val is None:
-                continue
-            elif isinstance(val, list) and len(val) == 0:
-                continue
-            elif isinstance(val, str):
-                info_str.append(f'{i}="{val}"')
-            else:
-                info_str.append(f"{i}={val}")
+        if not hasattr(obj, i):
+            continue
+        val = getattr(obj, i)
+        if val is None:
+            continue
+        elif isinstance(val, list) and len(val) == 0:
+            continue
+        elif isinstance(val, str):
+            info_str.append(f'{i}="{val}"')
+        else:
+            info_str.append(f"{i}={val}")
     info_str = ", ".join(info_str)
     return f'{type(obj).__name__}({info_str})'
 

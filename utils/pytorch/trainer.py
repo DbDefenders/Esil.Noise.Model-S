@@ -66,7 +66,7 @@ class Trainer(ModelManager):
         self.reload_optimizer(optimizer_path)
         return self
 
-    def train_an_epoch(self, tqdm_instance:tqdm=None)->float:
+    def train_an_epoch(self, tqdm_instance:tqdm=None, use_inner_tqdm:bool=True)->float:
         """
         启动一个训练周期
         """
@@ -74,7 +74,7 @@ class Trainer(ModelManager):
         self.model.train()
 
         for count, (features, labels, _) in enumerate(
-            tqdm(self.training_dataloader, leave=False, desc="[train]"),
+            tqdm(self.training_dataloader, leave=False, desc="[train]") if use_inner_tqdm else self.training_dataloader,
             start=1,  # 遍历数据加载器，使用tqdm显示进度条
         ):
             # 将数据和标签移动到指定设备（如GPU）

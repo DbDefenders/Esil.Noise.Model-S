@@ -94,6 +94,7 @@ class Tester(ModelManager):
         get_file_path: callable = None,
         get_label_name: callable = None,
         tqdm_instance: tqdm = None,
+        use_inner_tqdm: bool = True,
     ) -> tuple[TestMetrics, pd.DataFrame]:
         """
         启动一个测试周期
@@ -107,7 +108,8 @@ class Tester(ModelManager):
 
         with torch.no_grad():  # 在此上下文中，所有计算都不会跟踪梯度
             for count, (features, labels, idxes) in enumerate(
-                tqdm(self.testing_dataloader, leave=False, desc="[valid]"), start=1
+                tqdm(self.testing_dataloader, leave=False, desc="[valid]") if use_inner_tqdm else self.testing_dataloader, 
+                start=1
             ):
                 # 将数据和标签移动到指定设备（如GPU）
                 features = features.to(self.device)

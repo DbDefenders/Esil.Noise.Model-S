@@ -14,3 +14,4 @@ torchsummary
 Pyyaml
 tqdm
 pandas
+requests

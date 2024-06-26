@@ -86,6 +86,7 @@ class Trainer(ModelManager):
             if self.scaler is not None:  # 启用了自动混合精度训练
                 with amp.autocast(enabled=True):
                     pred = self.model.forward(features)  # 通过模型前向传播得到预测结果
+                    pred = torch.softmax(pred, dim=1) # softmax
                     loss = self.loss_func(pred, labels)  # 计算损失
                 self.scaler.scale(
                     loss
@@ -94,6 +95,7 @@ class Trainer(ModelManager):
                 self.scaler.update()  # 更新梯度缩放器的状态
             else:  # 没有启用自动混合精度训练
                 pred = self.model.forward(features)  # 通过模型前向传播得到预测结果
+                pred = torch.softmax(pred, dim=1) # softmax
                 loss = self.loss_func(pred, labels)  # 计算损失
                 loss.backward()  # 反向传播
             self.optimizer.step()  # 更新模型的参数

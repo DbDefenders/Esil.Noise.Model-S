@@ -65,14 +65,7 @@ class Tester(ModelManager):
         self.recall_func = self.get_metrics_func(recall_func)
         self.f1_score_func = self.get_metrics_func(f1_score_func, average="macro")
         self.f1_score_micro_func = self.get_metrics_func(f1_score_func, average="micro")
-
-        self.best_accuracy = 0.0
         # endregion
-
-    def set_best_accuracy(self, accuracy: float) -> "Tester":
-        if accuracy > self.best_accuracy:
-            self.best_accuracy = accuracy
-        return self
 
     def get_metrics_func(self, func: callable, average: str = "macro") -> callable:
         """
@@ -219,7 +212,6 @@ class Tester(ModelManager):
         trainer: Trainer,
         testing_dataloader: torch.utils.data.DataLoader,
         num_classes: int,
-        accuracy: float,
         acc_func: callable = tmf.accuracy,
         prec_func: callable = tmf.precision,
         auc_func: callable = tmf.auroc,
@@ -246,6 +238,5 @@ class Tester(ModelManager):
             f1_score_func=f1_score_func,
             device=trainer.device,
         )
-
-        ret.set_best_accuracy(accuracy)
+        
         return ret

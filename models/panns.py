@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from utils.common import create_repr_str
 
 
 class ConvBlock(nn.Module):
@@ -142,7 +143,7 @@ class CNN10(nn.Module):
     emb_size = 512
 
     def __init__(self, num_class, input_size, dropout=0.1, extract_embedding: bool = True):
-
+    
         super(CNN10, self).__init__()
         self.bn0 = nn.BatchNorm2d(input_size)
         self.conv_block1 = ConvBlock(in_channels=1, out_channels=64)
@@ -154,9 +155,16 @@ class CNN10(nn.Module):
         self.fc_audioset = nn.Linear(self.emb_size, 527)
         self.extract_embedding = extract_embedding
 
-        self.dropout = nn.Dropout(dropout)
+        self.dropout_layer = nn.Dropout(dropout)
         self.fc = nn.Linear(self.emb_size, num_class)
+        
+        self.num_class = num_class
+        self.input_size = input_size
+        self.dropout = dropout
 
+    def __repr__(self):
+        return create_repr_str(self, ['num_class','input_size','dropout'])
+        
     def forward(self, x):
         # x = x.unsqueeze(1)
         x = x.permute([0, 3, 2, 1])
@@ -186,7 +194,7 @@ class CNN10(nn.Module):
         else:
             output = F.sigmoid(self.fc_audioset(x))
 
-        x = self.dropout(output)
+        x = self.dropout_layer(output)
         logits = self.fc(x)
 
         return logits

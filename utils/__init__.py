@@ -19,10 +19,6 @@ class _Config:
         return self.load_config().get('Features', None)
     
     @property
-    def tags(self):
-        return self.load_config().get('Tags', None)
-    
-    @property
     def train(self):
         return self.load_config().get('Train', None)
     

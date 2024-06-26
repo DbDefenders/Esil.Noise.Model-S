@@ -10,3 +10,8 @@ gradio
 scikit-learn
 torchmetrics
 pympler
+torchsummary
+Pyyaml
+tqdm
+pandas
+requests

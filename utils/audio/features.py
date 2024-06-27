@@ -30,17 +30,17 @@ def get_feature_transformer(feature_type: Union[str, FeatureType], **kwargs):
     else:
         raise ValueError("Invalid feature type")
 
-def get_spectrogram_transformer(n_fft, hop_length, win_length=None):
+def get_spectrogram_transformer(n_fft, hop_length, win_length=None, **kwargs):
     return T.Spectrogram(
         n_fft=n_fft,
         win_length=win_length,
         hop_length=hop_length,
         center=True,
         pad_mode='reflect',# 反射
-        power=2.0
+        power=2.0, **kwargs
     )
 
-def get_melspec_transformer(sample_rate, n_fft, n_mels, hop_length, win_length=None):
+def get_melspec_transformer(sample_rate, n_fft, n_mels, hop_length, win_length=None, **kwargs):
     return T.MelSpectrogram(
         sample_rate=sample_rate,
         n_fft=n_fft,
@@ -52,10 +52,10 @@ def get_melspec_transformer(sample_rate, n_fft, n_mels, hop_length, win_length=N
         norm="slaney",
         # onesided=True,#  Argument 'onesided' has been deprecated and has no influence on the behavior of this module.
         n_mels=n_mels,
-        mel_scale="htk",
+        mel_scale="htk", **kwargs
     )
     
-def get_mfcc_transformer(sample_rate, n_mfcc, n_fft, n_mels, hop_length):
+def get_mfcc_transformer(sample_rate, n_mfcc, n_fft, n_mels, hop_length, **kwargs):
     return T.MFCC(
         sample_rate=sample_rate,
         n_mfcc=n_mfcc,
@@ -64,10 +64,10 @@ def get_mfcc_transformer(sample_rate, n_mfcc, n_fft, n_mels, hop_length):
             "n_mels": n_mels,
             "hop_length": hop_length,
             "mel_scale": "htk",
-        },
+        }, **kwargs
     )
 
-def get_lfcc_transformer(sample_rate, n_lfcc, n_fft, hop_length, win_length=None):
+def get_lfcc_transformer(sample_rate, n_lfcc, n_fft, hop_length, win_length=None, **kwargs):
     return T.LFCC(
         sample_rate=sample_rate,
         n_lfcc=n_lfcc,
@@ -76,6 +76,7 @@ def get_lfcc_transformer(sample_rate, n_lfcc, n_fft, hop_length, win_length=None
             "win_length": win_length,
             "hop_length": hop_length,
         },
+        **kwargs
     )
 
 def feature_from_config(feature:FeatureType):

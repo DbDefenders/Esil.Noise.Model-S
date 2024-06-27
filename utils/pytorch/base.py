@@ -8,8 +8,12 @@ class ModelManager:
         self.model = model.to(device)
         self.device = device
 
-    def save_model(self, save_path: str) -> str:
-        torch.save(self.model.state_dict(), save_path)
+    def save_model(self, save_path: str, is_data_parallel: bool = False) -> str:
+        # 多卡保存模型module
+        if is_data_parallel:
+            torch.save(self.model.module.state_dict(), save_path)
+        else:
+            torch.save(self.model.state_dict(), save_path)
         return save_path
 
     def load_model(self, load_path: str) -> torch.nn.Module:

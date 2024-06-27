@@ -7,7 +7,7 @@ from utils.plot import plot_spectrogram, plt2ndarray
 import yaml
 import json
 
-with open("configs.yml", "r") as f:
+with open("configs.yml", "r", encoding='utf-8') as f:
     config = yaml.safe_load(f)
     FeatureParams = config["Features"]
 

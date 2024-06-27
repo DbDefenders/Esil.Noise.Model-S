@@ -8,7 +8,7 @@ logger = getLogger(__name__)
 
 if __name__ == '__main__':
     # 获取服务器端口
-    if (p:=os.getenv('GRADIO_APP_SERVER_PORT')).isdigit():
+    if (p:=os.getenv('GRADIO_APP_SERVER_PORT', "")).isdigit():
         server_port = int(p)
     else:
         logger.warning(f"Invalid server port: {p}, using default port 8080")

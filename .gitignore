@@ -10,3 +10,4 @@ test.ipynb
 configs.yml
 training/**
 exp_**
+.ipynb_checkpoints/**

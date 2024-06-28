@@ -1,6 +1,7 @@
 from .models import Dataset, Label, Category
 from torch import nn
 import torch
+from utils.audio.extractor import EventExtractor
 
 class DatasetFactory:
     def __init__(self, category:Category, test_ratio:float=0.2, seed:int=1202):
@@ -26,7 +27,7 @@ class DatasetFactory:
 
         return counter_train, counter_test
 
-    def create_dataset(self, *, train:bool, target_sr:int, duration:float, extractor:nn.Module) -> torch.utils.data.Dataset:
+    def create_dataset(self, *, train:bool, target_sr:int, duration:float, extractor:nn.Module, event_extractor:EventExtractor=None) -> torch.utils.data.Dataset:
         '''
         获取训练集或测试集数据集
 
@@ -43,6 +44,6 @@ class DatasetFactory:
             X = self.X_test
             y = self.y_test
         
-        return Dataset(name=self.name, target_sr=target_sr, duration=duration, extractor=extractor, input_files=X, output_targets=y)
+        return Dataset(name=self.name, target_sr=target_sr, duration=duration, extractor=extractor, input_files=X, output_targets=y, event_extractor=event_extractor)
     
 __all__ = ['DatasetFactory', 'Dataset', 'Label', 'Category']

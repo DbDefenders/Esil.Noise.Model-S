@@ -1,4 +1,6 @@
 import torch
+import torchaudio
+import librosa
 from typing import List
 from functools import cached_property
 
@@ -6,6 +8,67 @@ from functools import cached_property
 from .features import FeatureType, get_spectrogram_transformer, get_melspec_transformer, get_mfcc_transformer, get_lfcc_transformer
 from ..math.normalization import min_max_normalize
 from ..math.relu import percent_relu
+from .analysor import find_sound_events, get_max_length_interval
+from .process import clip_signal
+
+class EventExtractor(torch.nn.Module):
+    def __init__(self, sample_rate:int, duration:float, device, time_interval:float=0.5, n_fft:int=1024, hop_length:int=512, win_length:int=None):
+        '''
+        初始化音频事件提取器
+        :param sample_rate: 音频采样率
+        :param duration: 音频时长
+        :param device: 计算设备
+        :param time_interval: 事件时间间隔
+        :param n_fft: STFT的FFT点数
+        :param hop_length: STFT窗口的跳跃长度
+        :param win_length: STFT窗口的长度，如果为None，则默认与n_fft相同
+        '''
+        self.device = device
+        self.time_interval = time_interval
+        self.sample_rate = sample_rate
+        self.duration = duration
+        self.n_fft = n_fft
+        self.hop_length = hop_length
+        self.win_length = win_length if win_length is not None else n_fft
+
+    @cached_property
+    def spectrogram_transform(self):
+        return torchaudio.transforms.Spectrogram(
+            n_fft=self.n_fft,
+            win_length=self.win_length,
+            hop_length=self.hop_length,
+            power=2.0
+        ).to(self.device)
+    
+    def forward(self, signal:torch.Tensor)->torch.Tensor:
+        signal = signal.to(self.device)
+        
+        spectrogram = self.spectrogram_transform(signal)
+
+        energy = torch.sum(spectrogram, dim=0)
+
+        energy_threshold = torch.mean(energy)
+
+        sound_frames = torch.where(energy > energy_threshold)[0]
+        sound_times = librosa.frames_to_time(sound_frames.cpu().numpy(), sr=self.sample_rate, hop_length=self.hop_length)
+
+        num_events, events = find_sound_events(sound_times, self.time_interval)
+        
+        if num_events == 0:
+            # 没有找到任何事件, 返回原始信号
+            return signal
+        else:
+            # 按事件裁剪
+            start, end = get_max_length_interval(events)
+            delta = end - start
+            
+            signal = clip_signal(signal, int(start*self.sample_rate), int(end*self.sample_rate))
+            # 将信号长度加长
+            multiplier = int(self.duration/delta)  # 计算增长比例
+            signal = signal.repeat(1, multiplier)  # 重复信号
+            return signal
+            
+            
 
 # 定义一个音频特征提取器类，继承自torch.nn.Module
 class Extractor(torch.nn.Module):

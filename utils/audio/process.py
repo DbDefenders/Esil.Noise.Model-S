@@ -28,3 +28,12 @@ def right_pad_signal(signal:torch.Tensor, num_samples):
         paddings = num_samples - s_len
         return torch.nn.functional.pad(signal, (0, paddings)) # 用0填充paddings个位置
     return signal
+
+def clip_signal(signal:torch.Tensor, start:int, end:int):
+    '''按照start和end裁剪音频信号'''
+    samples = signal.shape[1]
+    if start<0:
+        start = 0
+    if end>samples:
+        end = samples
+    return signal[:, start:end]

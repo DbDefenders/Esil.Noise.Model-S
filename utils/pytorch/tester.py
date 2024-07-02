@@ -219,6 +219,7 @@ class Tester(ModelManager):
         auc_func: callable = tmf.auroc,
         recall_func: callable = tmf.recall,
         f1_score_func: callable = tmf.f1_score,
+        accuracy:float=None, # 弃用的参数
     ):
         """
         从训练器中创建测试器
@@ -227,6 +228,9 @@ class Tester(ModelManager):
         :param testing_dataloader: 测试数据集的DataLoader
         :param label_lst: 标签列表
         """
+        if accuracy is not None:
+            UserWarning("accuracy is deprecated, please remove it from your code")
+        
         ret = cls(
             model=trainer.model,
             testing_dataloader=testing_dataloader,

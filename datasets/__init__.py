@@ -27,7 +27,7 @@ class DatasetFactory:
 
         return counter_train, counter_test
 
-    def create_dataset(self, *, train:bool, target_sr:int, duration:float, extractor:nn.Module, device, event_extractor:EventExtractor=None) -> torch.utils.data.Dataset:
+    def create_dataset(self, *, train:bool, target_sr:int, duration:float, extractor:nn.Module, event_extractor:EventExtractor=None, device='cpu') -> torch.utils.data.Dataset:
         '''
         获取训练集或测试集数据集
 

@@ -161,7 +161,7 @@ class DatasetBase(ABC, torch.utils.data.Dataset):
     '''
     audiofile -> signal,sr -> features -> extractor -> **dataset** -> dataloader -> model
     '''
-    def __init__(self, target_sr:int, duration:float, *, extractor:torch.nn.Module=None,device,dtype=torch.float32):
+    def __init__(self, target_sr:int, duration:float, *, extractor:torch.nn.Module=None,dtype=torch.float32, device='cpu'):
         self.target_sr = target_sr
         self.duration = duration
         self.device = device

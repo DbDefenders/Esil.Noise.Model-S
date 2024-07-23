@@ -5,7 +5,7 @@ from .base import DatasetBase, resample, mix_down, cut_signal, right_pad_signal
 from utils.audio.extractor import EventExtractor
 
 class Dataset(DatasetBase):
-    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], device, extractor:nn.Module=None, event_extractor:EventExtractor=None):
+    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], extractor:nn.Module=None, event_extractor:EventExtractor=None, device='cpu'):
         '''
         __init__ function of Dataset class.
         Args:

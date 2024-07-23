@@ -10,7 +10,6 @@ from utils.common import BisectList, get_child, save_json
 from utils.audio.process import resample, mix_down, cut_signal, right_pad_signal
 
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class DataSourceBase(BisectList, ABC):
     def __init__(self, base_dir:str, name:str, label:int=None, length:int=None, childs:List['DataSourceBase']=None):
@@ -162,7 +161,7 @@ class DatasetBase(ABC, torch.utils.data.Dataset):
     '''
     audiofile -> signal,sr -> features -> extractor -> **dataset** -> dataloader -> model
     '''
-    def __init__(self, target_sr:int, duration:float, *, extractor:torch.nn.Module=None,device=DEVICE,dtype=torch.float32):
+    def __init__(self, target_sr:int, duration:float, *, extractor:torch.nn.Module=None,dtype=torch.float32, device='cpu'):
         self.target_sr = target_sr
         self.duration = duration
         self.device = device
@@ -194,7 +193,8 @@ class DatasetBase(ABC, torch.utils.data.Dataset):
         label = self._get_label(index)
         # 读取音频
         signal, sr = torchaudio.load(audio_file)
-        signal.to(self.dtype)
+        signal = signal.to(self.dtype)
+        signal = signal.to(self.device)
         # 重采样
         signal = resample(signal, sr, self.sample_rate)
         # 声道融合

@@ -5,7 +5,7 @@ from .base import DatasetBase, resample, mix_down, cut_signal, right_pad_signal
 from utils.audio.extractor import EventExtractor
 
 class Dataset(DatasetBase):
-    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], extractor:nn.Module=None, event_extractor:EventExtractor=None):
+    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], extractor:nn.Module=None, event_extractor:EventExtractor=None, device='cpu'):
         '''
         __init__ function of Dataset class.
         Args:
@@ -22,7 +22,7 @@ class Dataset(DatasetBase):
         self.length = len(input_files)
         self.input_files = input_files
         self.output_targets = output_targets
-        super().__init__(target_sr, duration, extractor=extractor)
+        super().__init__(target_sr, duration, extractor=extractor, device=device)
         self.event_extractor = event_extractor
 
     def __len__(self):
@@ -40,7 +40,7 @@ class Dataset(DatasetBase):
             label = self._get_label(index)
             # 读取音频
             signal, sr = torchaudio.load(audio_file)
-            signal.to(self.dtype)
+            signal =  signal.to(self.dtype)
             # 重采样
             signal = resample(signal, sr, self.sample_rate)
             # 声道融合

@@ -77,11 +77,11 @@ class SupportedSourceTypes(Enum):
     US8K = get_func_params(US8KDataSource.__init__)
     ESC50 = get_func_params(ESC50DataSource.__init__)
     BIRDCLEF = get_func_params(BirdclefDataSource.__init__)
-    TRAFFIC = get_func_params(ProvinceDataSource.__init__)
-    NATURE = get_func_params(ProvinceDataSource.__init__)
-    INDUSTRIAL = get_func_params(ProvinceDataSource.__init__)
-    SOCIAL = get_func_params(ProvinceDataSource.__init__)
-    CONSTRUCTIONAL = get_func_params(ProvinceDataSource.__init__)
+    TRAFFIC = get_func_params(ProvinceDataSource.__init__, type_='TRAFFIC')
+    NATURE = get_func_params(ProvinceDataSource.__init__, type_='NATURE')
+    INDUSTRIAL = get_func_params(ProvinceDataSource.__init__, type_='INDUSTRIAL')
+    SOCIAL = get_func_params(ProvinceDataSource.__init__, type_='SOCIAL')
+    CONSTRUCTIONAL = get_func_params(ProvinceDataSource.__init__, type_='CONSTRUCTIONAL')
     
     def get(self, **kwargs):
         '''

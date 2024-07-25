@@ -7,7 +7,6 @@ from bisect import bisect_left
 from functools import singledispatch
 from IPython.display import clear_output
 import inspect
-import time
 
 __all__ = [
     "clear_jupyter",
@@ -19,13 +18,15 @@ __all__ = [
 ]
 
 
-def get_func_params(func: Callable) -> Dict[str, Any]:
+def get_func_params(func: Callable, **kwargs) -> Dict[str, Any]:
     parameters = inspect.signature(func).parameters
     ret = {
         "Function": func.__name__,
         "Parameters": [p.name for p in parameters.values()],
-        "ID": f"{int(time.time())}-{id(func)}",
+        "ID": f"{id(func)}",
     }
+    if kwargs:
+        ret.update(kwargs)
     return ret
 
 

@@ -9,25 +9,24 @@ from IPython.display import clear_output
 import inspect
 import time
 
-__all__ = ["clear_jupyter", "create_repr_str", "get_child", "BisectList", "save_json"]
+__all__ = [
+    "clear_jupyter",
+    "create_repr_str",
+    "get_child",
+    "BisectList",
+    "save_json",
+    "get_func_params",
+]
+
 
 def get_func_params(func: Callable) -> Dict[str, Any]:
     parameters = inspect.signature(func).parameters
     ret = {
         "Function": func.__name__,
         "Parameters": [p.name for p in parameters.values()],
-        "ID": f'{int(time.time())}-{id(func)}'
+        "ID": f"{int(time.time())}-{id(func)}",
     }
     return ret
-
-# 示例函数
-def example_function(a, b, c=10, *args, **kwargs):
-    pass
-
-# 调用 get_func_params 函数
-params_info = get_func_params(example_function)
-print(params_info)
-
 
 
 def clear_jupyter():

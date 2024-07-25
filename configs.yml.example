@@ -7,10 +7,10 @@ DataSources:
   Province:
     # 英文文件夹
     base_dir: \\10.166.168.123\provincedata
-    meta_file: ./static/meta_file/province_en.json
+    use_en: True
     # # 中文文件夹
     # base_dir: \\10.166.168.123\典型城市声纹数据库-标签过
-    # meta_file: ./static/meta_file/province.json
+    # use_en: False
   Birdclef:
     base_dir: \\10.166.168.123\BirdClef2021
 Features:

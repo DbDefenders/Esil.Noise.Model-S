@@ -114,7 +114,7 @@ class ProvinceDataSource(DataSourceBase):
     def __init__(
         self,
         base_dir: str,
-        meta_file: str = "static/meta_file/province.json",
+        use_en:bool=False,
         *,
         name: str,
         label: int = None,
@@ -123,6 +123,11 @@ class ProvinceDataSource(DataSourceBase):
     ):
         self.parent = parent
         
+        if use_en:
+            meta_file = "static/meta_file/province_en.json"
+        else:
+            meta_file = "static/meta_file/province.json"
+            
         with open(meta_file, "r", encoding="utf-8") as f:
             graph = json.load(f)
         
@@ -133,7 +138,7 @@ class ProvinceDataSource(DataSourceBase):
             for i, l in enumerate(label_lst):
                 childs.append(
                     ProvinceDataSource(
-                        base_dir=base_dir, name=l, label=i, length=1200, parent=name, meta_file=meta_file
+                        base_dir=base_dir, name=l, label=i, length=1200, parent=name, use_en=use_en
                     )
                 )
         super().__init__(

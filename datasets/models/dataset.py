@@ -1,11 +1,16 @@
 import torch.nn as nn
 import torchaudio
 from .base import DatasetBase, resample, mix_down, cut_signal, right_pad_signal
-
+from torchvision import transforms
 from utils.audio.extractor import EventExtractor
-
+import audiomentations
+import albumentations
+import torch
+import numpy as np
 class Dataset(DatasetBase):
-    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], extractor:nn.Module=None, event_extractor:EventExtractor=None, device='cpu'):
+    def __init__(self, name:str, target_sr:int, duration:float, input_files:list[str], output_targets:list[int], extractor:nn.Module=None, 
+                 event_extractor:EventExtractor=None,wav_augmentor:audiomentations.Compose=None, spec_augmentor:albumentations.Compose=None,
+                   transform:transforms.Compose=None,device='cpu'):
         '''
         __init__ function of Dataset class.
         Args:
@@ -24,7 +29,10 @@ class Dataset(DatasetBase):
         self.output_targets = output_targets
         super().__init__(target_sr, duration, extractor=extractor, device=device)
         self.event_extractor = event_extractor
-
+        self.wav_augmentor = wav_augmentor
+        self.spec_augmentor = spec_augmentor
+        self.transform = transform
+        
     def __len__(self):
         return self.length
     
@@ -51,11 +59,30 @@ class Dataset(DatasetBase):
             
             # 裁剪/填充音频
             signal = cut_signal(signal=signal, num_samples=self.num_samples) if signal.shape[1]>self.num_samples else right_pad_signal(signal=signal, num_samples=self.num_samples)
-            # 提取音频特征
+            
+            # 波形增强
+            if self.wav_augmentor is not None:
+                signal = torch.tensor(self.wav_augmentor(signal.numpy(),sr))
+            signal = signal.to(self.device)
+
+            feature = signal
+            # 特征提取
             if self.extractor is not None:
-                feature = self.extractor(signal)
-            else:
-                feature = signal
+                feature = self.extractor(feature)
+
+            # 频谱增强
+            if self.spec_augmentor is not None:
+                # 将特征转换为numpy数组，并调整轴的顺序以匹配spec_augmentor的输入要求
+                feature = np.array(feature.cpu()).transpose(1, 2, 0)
+                # 应用频谱增强
+                feature = self.spec_augmentor(image=feature)["image"]
+                # 将特征转回原始形状，并转换为tensor
+                feature = torch.tensor(feature.transpose(2, 0, 1))
+                
+            # 特征转换
+            if self.transform is not None:
+                feature = self.transform(feature)
+
             return feature, label, index
         else:
             return super().__getitem__(index)

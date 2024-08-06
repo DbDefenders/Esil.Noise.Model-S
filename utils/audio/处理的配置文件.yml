@@ -1,0 +1,21 @@
+Signal:
+  - ChannelChanger:
+      num_channels: 1
+  - VadClipper:
+      top_db: 10
+Extractor:
+  - MFCC:
+      num_ceps: 13
+  - MelSpectrogram:
+      n_fft: 2048
+      hop_length: 512
+      n_mels: 128
+Feature:
+  - DataMasker:
+      time_mask_start: 0
+      time_mask_end:  10
+      freq_mask_start:  0
+      freq_mask_end: 8
+      num_mask:  1
+      mask_value:  0
+      mask_mode: "intersection"
